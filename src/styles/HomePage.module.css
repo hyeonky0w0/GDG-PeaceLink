@@ -305,3 +305,193 @@
   font-size: 14px;
   color: #e53e3e;
 }
+/* ──────────────────────────────────────────────
+   HomePage.module.css 에 아래 내용을 추가하세요.
+   (기존 스타일 아래에 붙여넣기)
+────────────────────────────────────────────── */
+
+/* ── 스크롤 본문 래퍼 ── */
+.scrollBody {
+  flex: 1;
+  overflow-y: auto;
+  /* 하단 네비게이션 바(60px) + 여유(8px) */
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 8px);
+}
+
+/* ── 실시간 상황 섹션 ── */
+.situationSection {
+  background: #fff;
+  padding: 20px 16px 8px;
+}
+
+.situationHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.situationTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0;
+}
+
+.situationLegend {
+  display: flex;
+  gap: 10px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #718096;
+}
+
+.legendDot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.situationLoading {
+  font-size: 13px;
+  color: #a0aec0;
+  padding: 8px 0;
+}
+
+.situationList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.situationItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.situationItem:last-child {
+  border-bottom: none;
+}
+
+.situationIconWrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #f7f8fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 22px;
+}
+
+.situationBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.situationName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.situationLocation {
+  font-size: 12px;
+  color: #a0aec0;
+}
+
+.situationRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.situationLevel {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.situationTime {
+  font-size: 11px;
+  color: #a0aec0;
+}
+
+.situationMore {
+  display: block;
+  width: 100%;
+  padding: 14px 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3b82f6;
+  background: none;
+  border: none;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+}
+
+/* ── 하단 네비게이션 바 ── */
+.bottomNav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(60px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: #fff;
+  border-top: 1px solid #ececec;
+  display: flex;
+  align-items: stretch;
+  z-index: 100;
+  /* 부드러운 상단 그림자 */
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.navItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 0 0;
+  /* 탭 전환 애니메이션 */
+  transition: color 0.15s ease;
+  color: #b0b8c1;
+}
+
+.navItemActive {
+  color: #3b82f6;
+}
+
+.navIcon {
+  font-size: 22px;
+  line-height: 1;
+  /* 아이콘 크기 통일을 위해 필요하면 filter로 컬러 처리 */
+}
+
+.navLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}

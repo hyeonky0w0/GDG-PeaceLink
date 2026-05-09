@@ -28,23 +28,34 @@ export function useUserLocation() {
     localStorage.setItem(LOCATION_KEY, JSON.stringify(next));
   }, []);
 
-  const detectGPS = useCallback(() => {
-    return new Promise<void>((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error("GPS를 지원하지 않는 기기입니다."));
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          // 실제로는 좌표 → 행정구역 역지오코딩 API 호출 필요
-          // 여기서는 좌표만 업데이트하고 구 이름은 유지
-          updateLocation(location.district, pos.coords.latitude, pos.coords.longitude);
+  const detectGPS = useCallback((): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        const geocoder = new window.kakao.maps.services.Geocoder();
+        geocoder.coord2RegionCode(lng, lat, (result: any[], status: string) => {
+          if (status === window.kakao.maps.services.Status.OK) {
+            const region = result.find((r) => r.region_type === "H");
+            if (region) {
+              updateLocation(
+                { code: region.code, name: `${region.region_1depth_name} ${region.region_2depth_name}` },
+                lat,
+                lng
+              );
+            }
+          }
           resolve();
-        },
-        () => reject(new Error("위치 정보를 가져올 수 없습니다."))
-      );
-    });
-  }, [location.district, updateLocation]);
+        });
+      },
+      (err) => {
+        console.warn("GPS 감지 실패:", err.message);
+        reject(err);
+      }
+    );
+  });
+}, [updateLocation]);
 
+  
   return { location, updateLocation, detectGPS };
 }

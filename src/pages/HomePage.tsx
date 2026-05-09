@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Map, MapMarker, Polyline, useKakaoLoader } from "react-kakao-maps-sdk";
 
+import { BottomNav } from "../components/BottomNav";
+import { useNavigate } from "react-router-dom";
 import { useDeviceId } from "../hooks/useDeviceId";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { useEmergencyAlerts } from "../hooks/useEmergencyAlerts";
@@ -15,11 +17,12 @@ import {
 
 import styles from "../styles/HomePage.module.css";
 
-const MOCK_USER_ID = "550e8400-e29b-41d4-a716-446655440000";
+// ── 마커 이미지 ──────────────────────────────────────────────
 
-// 일반 대피소 마커 (파란색)
 const SHELTER_MARKER_IMAGE = {
-  src: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+  src:
+    "data:image/svg+xml;charset=utf-8," +
+    encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
       <filter id="s" x="-20%" y="-20%" width="140%" height="140%">
         <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#00000033"/>
@@ -34,9 +37,10 @@ const SHELTER_MARKER_IMAGE = {
   options: { offset: { x: 18, y: 44 } },
 };
 
-// 선택된 대피소 마커 (주황색)
 const SHELTER_SELECTED_MARKER_IMAGE = {
-  src: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+  src:
+    "data:image/svg+xml;charset=utf-8," +
+    encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg" width="42" height="52" viewBox="0 0 42 52">
       <filter id="s" x="-20%" y="-20%" width="140%" height="140%">
         <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#00000044"/>
@@ -51,9 +55,10 @@ const SHELTER_SELECTED_MARKER_IMAGE = {
   options: { offset: { x: 21, y: 52 } },
 };
 
-// 현재 위치 마커
 const USER_MARKER_IMAGE = {
-  src: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+  src:
+    "data:image/svg+xml;charset=utf-8," +
+    encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22">
       <circle cx="11" cy="11" r="9" fill="#3b82f6" stroke="white" stroke-width="3"/>
       <circle cx="11" cy="11" r="3" fill="white"/>
@@ -63,29 +68,65 @@ const USER_MARKER_IMAGE = {
   options: { offset: { x: 11, y: 11 } },
 };
 
+// ── 실시간 상황 타입 (나중에 API 연동 시 services/situationApi.ts 로 이동) ──
+
+export type SituationLevel = "높음" | "중간" | "낮음" | "안전";
+
+export interface SituationItem {
+  id: string;
+  icon: string;         // 이모지 또는 아이콘 키
+  title: string;        // e.g. "산불 발생"
+  location: string;     // e.g. "중구 남산동"
+  level: SituationLevel;
+  minutesAgo: number;
+}
+
+// 임시 목업 데이터 – API 연동 시 fetchRealtimeSituations() 로 교체
+const MOCK_SITUATIONS: SituationItem[] = [
+  { id: "1", icon: "🔥", title: "산불 발생", location: "중구 남산동",  level: "높음", minutesAgo: 2  },
+  { id: "2", icon: "💨", title: "연기 발생", location: "청구동 일대",  level: "중간", minutesAgo: 5  },
+  { id: "3", icon: "🚧", title: "도로 통제", location: "퇴계로 3가",   level: "낮음", minutesAgo: 10 },
+];
+
+const LEVEL_COLOR: Record<SituationLevel, string> = {
+  높음: "#ef4444",
+  중간: "#f97316",
+  낮음: "#22c55e",
+  안전: "#3b82f6",
+};
+
+
+
+// ── 컴포넌트 ─────────────────────────────────────────────────
+
 export default function HomePage() {
   const [mapLoading, mapError] = useKakaoLoader({
     appkey: import.meta.env.VITE_KAKAO_KEY,
     libraries: ["services", "clusterer"],
   });
 
-  const deviceId = useDeviceId();
+  const navigate = useNavigate();
+  const { deviceId, userId } = useDeviceId();
   const { location, updateLocation, detectGPS } = useUserLocation();
   const { alerts, loading: alertLoading, error: alertError, dismiss } =
     useEmergencyAlerts(location.district.code, deviceId);
 
   const [locationModalOpen, setLocationModalOpen] = useState(false);
 
-  // 대피소 목록 + 선택 상태
+  // 대피소
   const [shelters, setShelters] = useState<NearestShelterResponse[]>([]);
   const [selectedShelter, setSelectedShelter] = useState<NearestShelterResponse | null>(null);
   const [shelterLoading, setShelterLoading] = useState(false);
   const [shelterError, setShelterError] = useState<string | null>(null);
 
-  // 경로 생성 상태
+  // 경로
   const [routeResult, setRouteResult] = useState<EvacuationRouteResponse | null>(null);
   const [routeLoading, setRouteLoading] = useState(false);
   const [routeError, setRouteError] = useState<string | null>(null);
+
+  // 실시간 상황 – 나중에 useRealtimeSituations(location.district.code) 훅으로 교체
+  const [situations] = useState<SituationItem[]>(MOCK_SITUATIONS);
+  const [situationLoading] = useState(false); // API 연동 시 실제 로딩 상태 사용
 
   // 위치가 바뀌면 주변 대피소 5개 조회
   useEffect(() => {
@@ -102,12 +143,12 @@ export default function HomePage() {
 
   // 길 안내 시작
   const handleNavigate = async () => {
-    if (!selectedShelter) return;
+    if (!selectedShelter || !userId) return;
     setRouteLoading(true);
     setRouteError(null);
     try {
       const result = await createEvacuationRoute({
-        userId: MOCK_USER_ID,
+        userId,
         originLat: location.lat,
         originLng: location.lng,
         destLat: selectedShelter.lat,
@@ -129,6 +170,8 @@ export default function HomePage() {
     }
   };
 
+  // ── 로딩 / 에러 화면 ────────────────────────────────────────
+
   if (mapLoading) {
     return (
       <div className={styles.centered}>
@@ -144,6 +187,8 @@ export default function HomePage() {
       </div>
     );
   }
+
+  // ── 메인 렌더 ────────────────────────────────────────────────
 
   return (
     <div className={styles.page}>
@@ -181,113 +226,174 @@ export default function HomePage() {
         onDismiss={dismiss}
       />
 
-      {/* ── 지도 영역 ── */}
-      <div className={styles.mapSection}>
-        <Map
-          center={{ lat: location.lat, lng: location.lng }}
-          style={{ width: "100%", height: "100%" }}
-          level={4}
-        >
-          {/* 현재 위치 마커 */}
-          <MapMarker
-            position={{ lat: location.lat, lng: location.lng }}
-            image={USER_MARKER_IMAGE}
-          />
+      {/* ── 스크롤 가능한 본문 (네비게이션 바 높이만큼 패딩) ── */}
+      <div className={styles.scrollBody}>
 
-          {/* 주변 대피소 마커들 */}
-          {shelters.map((s) => (
+        {/* ── 지도 영역 ── */}
+        <div className={styles.mapSection}>
+          <Map
+            center={{ lat: location.lat, lng: location.lng }}
+            style={{ width: "100%", height: "100%" }}
+            level={4}
+          >
+            {/* 현재 위치 마커 */}
             <MapMarker
-              key={s.id}
-              position={{ lat: s.lat, lng: s.lng }}
-              image={s.id === selectedShelter?.id
-                ? SHELTER_SELECTED_MARKER_IMAGE
-                : SHELTER_MARKER_IMAGE}
-              onClick={() => setSelectedShelter(s)}
+              position={{ lat: location.lat, lng: location.lng }}
+              image={USER_MARKER_IMAGE}
             />
-          ))}
 
-          {/* 선택된 대피소로 경로선 */}
-          {selectedShelter && (
-            <Polyline
-              path={[
-                { lat: location.lat, lng: location.lng },
-                { lat: selectedShelter.lat, lng: selectedShelter.lng },
-              ]}
-              strokeWeight={4}
-              strokeColor="#3b82f6"
-              strokeOpacity={0.85}
-              strokeStyle="solid"
-            />
-          )}
-        </Map>
+            {/* 주변 대피소 마커들 */}
+            {shelters.map((s) => (
+              <MapMarker
+                key={s.id}
+                position={{ lat: s.lat, lng: s.lng }}
+                image={
+                  s.id === selectedShelter?.id
+                    ? SHELTER_SELECTED_MARKER_IMAGE
+                    : SHELTER_MARKER_IMAGE
+                }
+                onClick={() => setSelectedShelter(s)}
+              />
+            ))}
 
-        {/* ── 대피소 카드 오버레이 ── */}
-        <div className={styles.shelterOverlay}>
-          <div className={styles.shelterBadge}>
-            <span className={styles.shelterBadgeDot} />
-            가장 가까운 대피소
-          </div>
+            {/* 선택된 대피소로 경로선 */}
+            {selectedShelter && (
+              <Polyline
+                path={[
+                  { lat: location.lat, lng: location.lng },
+                  { lat: selectedShelter.lat, lng: selectedShelter.lng },
+                ]}
+                strokeWeight={4}
+                strokeColor="#3b82f6"
+                strokeOpacity={0.85}
+                strokeStyle="solid"
+              />
+            )}
+          </Map>
 
-          {shelterLoading && (
-            <p style={{ fontSize: 13, color: "#a0aec0" }}>대피소 조회 중...</p>
-          )}
+          {/* ── 대피소 카드 오버레이 ── */}
+          <div className={styles.shelterOverlay}>
+            <div className={styles.shelterBadge}>
+              <span className={styles.shelterBadgeDot} />
+              가장 가까운 대피소
+            </div>
 
-          {shelterError && (
-            <p style={{ fontSize: 13, color: "#e53e3e" }}>{shelterError}</p>
-          )}
+            {shelterLoading && (
+              <p style={{ fontSize: 13, color: "#a0aec0" }}>대피소 조회 중...</p>
+            )}
+            {shelterError && (
+              <p style={{ fontSize: 13, color: "#e53e3e" }}>{shelterError}</p>
+            )}
 
-          {selectedShelter && !shelterLoading && (
-            <>
-              <div className={styles.shelterInfo}>
-                <div className={styles.shelterThumb}>🏫</div>
-                <div className={styles.shelterDetails}>
-                  <h2 className={styles.shelterName}>{selectedShelter.name}</h2>
-                  <p className={styles.shelterMeta}>
-                    {selectedShelter.distanceKm.toFixed(1)} km / 도보 {selectedShelter.walkMinutes}분
-                  </p>
+            {selectedShelter && !shelterLoading && (
+              <>
+                <div className={styles.shelterInfo}>
+                  <div className={styles.shelterThumb}>🏫</div>
+                  <div className={styles.shelterDetails}>
+                    <h2 className={styles.shelterName}>{selectedShelter.name}</h2>
+                    <p className={styles.shelterMeta}>
+                      {selectedShelter.distanceKm.toFixed(1)} km / 도보{" "}
+                      {selectedShelter.walkMinutes}분
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              {routeResult && (
-                <p style={{ fontSize: 12, color: "#3b82f6", marginBottom: 6 }}>
-                  ✅ 경로 저장됨 ({routeResult.shelterCode})
-                </p>
-              )}
-              {routeError && (
-                <p style={{ fontSize: 12, color: "#e53e3e", marginBottom: 6 }}>
-                  {routeError}
-                </p>
-              )}
+                {routeResult && (
+                  <p style={{ fontSize: 12, color: "#3b82f6", marginBottom: 6 }}>
+                    ✅ 경로 저장됨 ({routeResult.shelterCode})
+                  </p>
+                )}
+                {routeError && (
+                  <p style={{ fontSize: 12, color: "#e53e3e", marginBottom: 6 }}>
+                    {routeError}
+                  </p>
+                )}
 
-              <button
-                className={styles.navigateBtn}
-                onClick={handleNavigate}
-                disabled={routeLoading}
-              >
-                <span className={styles.navigateBtnIcon}>➤</span>
-                {routeLoading ? "경로 생성 중..." : "길 안내 시작"}
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* ── 제보 배너 ── */}
-      <div className={styles.reportBanner}>
-        <div className={styles.reportTextGroup}>
-          <h3 className={styles.reportTitle}>위험을 발견하셨나요?</h3>
-          <p className={styles.reportDesc}>
-            사진, 소리로 제보하고<br />
-            모두의 안전을 지켜주세요.
-          </p>
-          <button className={styles.reportBtn}>제보하기</button>
-        </div>
-        <div className={styles.reportIllustration}>
-          <div className={styles.reportPhone}>
-            <span className={styles.reportPhoneIcon}>⚠️</span>
+                <button
+                  className={styles.navigateBtn}
+                  onClick={handleNavigate}
+                  disabled={routeLoading || !userId}
+                >
+                  <span className={styles.navigateBtnIcon}>➤</span>
+                  {routeLoading ? "경로 생성 중..." : "길 안내 시작"}
+                </button>
+              </>
+            )}
           </div>
         </div>
-      </div>
+
+        {/* ── 제보 배너 ── */}
+        <div className={styles.reportBanner}>
+          <div className={styles.reportTextGroup}>
+            <h3 className={styles.reportTitle}>위험을 발견하셨나요?</h3>
+            <p className={styles.reportDesc}>
+              사진, 소리로 제보하고
+              <br />
+              모두의 안전을 지켜주세요.
+            </p>
+            <button className={styles.reportBtn} onClick={() => navigate("/report")}>
+              제보하기
+            </button>
+          </div>
+          <div className={styles.reportIllustration}>
+            <div className={styles.reportPhone}>
+              <span className={styles.reportPhoneIcon}>⚠️</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── 실시간 상황 ── (제보 배너 아래로 이동) */}
+        <section className={styles.situationSection}>
+          {/* 섹션 헤더 */}
+          <div className={styles.situationHeader}>
+            <h2 className={styles.situationTitle}>실시간 상황</h2>
+            <div className={styles.situationLegend}>
+              {(["높음", "중간", "낮음", "안전"] as SituationLevel[]).map((lv) => (
+                <span key={lv} className={styles.legendItem}>
+                  <span
+                    className={styles.legendDot}
+                    style={{ background: LEVEL_COLOR[lv] }}
+                  />
+                  {lv}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* 아이템 목록 */}
+          {situationLoading ? (
+            <p className={styles.situationLoading}>상황 조회 중...</p>
+          ) : (
+            <ul className={styles.situationList}>
+              {situations.map((item) => (
+                <li key={item.id} className={styles.situationItem}>
+                  <div className={styles.situationIconWrap}>
+                    <span className={styles.situationIcon}>{item.icon}</span>
+                  </div>
+                  <div className={styles.situationBody}>
+                    <span className={styles.situationName}>{item.title}</span>
+                    <span className={styles.situationLocation}>{item.location}</span>
+                  </div>
+                  <div className={styles.situationRight}>
+                    <span
+                      className={styles.situationLevel}
+                      style={{ color: LEVEL_COLOR[item.level] }}
+                    >
+                      {item.level}
+                    </span>
+                    <span className={styles.situationTime}>{item.minutesAgo}분 전</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <button className={styles.situationMore}>상황 더보기 &gt;</button>
+        </section>
+
+      </div>{/* end scrollBody */}
+
+      <BottomNav /> 
 
       {/* ── 위치 모달 ── */}
       {locationModalOpen && (
@@ -299,5 +405,7 @@ export default function HomePage() {
         />
       )}
     </div>
+    
+    
   );
 }
