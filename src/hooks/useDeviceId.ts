@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 
 const DEVICE_ID_KEY = "peacelink_device_id";
+const USER_ID_KEY = "peacelink_user_id";
 
 function generateDeviceId(): string {
   const timestamp = Date.now().toString(36);
@@ -8,17 +9,17 @@ function generateDeviceId(): string {
   return `PL-${timestamp}-${random}`.toUpperCase();
 }
 
-export function useDeviceId(): string {
-  const [deviceId, setDeviceId] = useState<string>("");
+export function useDeviceId() {
+  const [deviceId, setDeviceId] = useState("");
+  const [userId, setUserId] = useState("");
 
   useEffect(() => {
-    let id = localStorage.getItem(DEVICE_ID_KEY);
-    if (!id) {
-      id = generateDeviceId();
-      localStorage.setItem(DEVICE_ID_KEY, id);
-    }
-    setDeviceId(id);
+    // 저장된 값 불러오기
+    const savedDeviceId = localStorage.getItem(DEVICE_ID_KEY) ?? "";
+    const savedUserId = localStorage.getItem(USER_ID_KEY) ?? "";
+    setDeviceId(savedDeviceId);
+    setUserId(savedUserId);
   }, []);
 
-  return deviceId;
+  return { deviceId, userId };
 }
