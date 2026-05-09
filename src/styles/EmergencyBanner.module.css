@@ -1,0 +1,102 @@
+/* EmergencyBanner.module.css */
+
+.banner {
+  border-radius: 10px;
+  margin: 10px 14px;
+  padding: 12px 14px;
+  border: 1px solid;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.banner.critical {
+  background: #fff5f5;
+  border-color: #feb2b2;
+}
+
+.banner.warning {
+  background: #fffbeb;
+  border-color: #fbd38d;
+}
+
+.banner.info {
+  background: #ebf8ff;
+  border-color: #bee3f8;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.labelGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon {
+  font-size: 14px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.label.critical { color: #c53030; }
+.label.warning  { color: #b7791f; }
+.label.info     { color: #2b6cb0; }
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #a0aec0;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+
+.message {
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.message.critical { color: #742a2a; }
+.message.warning  { color: #744210; }
+.message.info     { color: #1a365d; }
+
+.skeleton {
+  background: #f0f0f0;
+  border-radius: 10px;
+  margin: 10px 14px;
+  padding: 14px;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.skeletonLine {
+  height: 12px;
+  background: #e0e0e0;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.skeletonLine:last-child {
+  width: 60%;
+  margin-bottom: 0;
+}
