@@ -1,0 +1,146 @@
+/* LocationModal.module.css */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheet {
+  background: #ffffff;
+  width: 100%;
+  max-width: 402px;
+  border-radius: 20px 20px 0 0;
+  padding: 20px 20px 36px;
+  animation: slideUp 0.25s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.handle {
+  width: 36px;
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 2px;
+  margin: 0 auto 18px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #a0aec0;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+
+.gpsBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ebf8ff;
+  border: 1px solid #bee3f8;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2b6cb0;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.gpsIcon {
+  font-size: 18px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.dividerText {
+  font-size: 12px;
+  color: #a0aec0;
+}
+
+.searchInput {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 14px;
+  color: #1a202c;
+  margin-bottom: 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.searchInput:focus {
+  border-color: #3b82f6;
+}
+
+.districtList {
+  max-height: 240px;
+  overflow-y: auto;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.districtItem {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 13px 16px;
+  font-size: 14px;
+  color: #2d3748;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.districtItem:last-child {
+  border-bottom: none;
+}
+
+.districtItem:hover {
+  background: #f7fafc;
+}
+
+.districtItem.active {
+  background: #ebf8ff;
+  color: #2b6cb0;
+  font-weight: 600;
+}
