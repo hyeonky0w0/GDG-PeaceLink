@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 export const DEVICE_ID_KEY = "peacelink_device_id";
 export const USER_ID_KEY = "peacelink_user_id";
 
+const BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+
 function generateDeviceId(): string {
   const timestamp = Date.now().toString(36);
   const random = Math.random().toString(36).substring(2, 10);
@@ -23,7 +25,7 @@ export function useDeviceId() {
       setDeviceId(did);
 
       try {
-        const res = await fetch("/api/user/register-device", {
+        const res = await fetch(`${BASE}/api/user/register-device`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ deviceId: did }),

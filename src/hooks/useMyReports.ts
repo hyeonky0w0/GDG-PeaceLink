@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
+const BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
 export type ReportType =
   | "FIRE_SMOKE"
@@ -78,7 +79,7 @@ export function useMyReports(userId: string | null) {
     setLoading(true);
     setError(null);
 
-    fetch(`/api/reports/user/${userId}`)
+    fetch(`${BASE}/api/reports/user/${userId}`)
       .then((r) => {
         if (!r.ok) throw new Error(`서버 오류 (${r.status})`);
         return r.json();
