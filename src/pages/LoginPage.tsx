@@ -34,11 +34,14 @@ export default function LoginPage() {
         localStorage.setItem(DEVICE_ID_KEY, deviceId);
       }
 
-      const res = await fetch("/api/user/register-device", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deviceId, language: "ko" }),
-      });
+      const res = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL ?? ""}/api/user/register-device`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ deviceId, language: "ko" }),
+          }
+        );
 
       if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
 
