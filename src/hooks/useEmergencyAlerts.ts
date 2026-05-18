@@ -1,37 +1,47 @@
 import { useState, useEffect, useCallback } from "react";
 import type { EmergencyAlert } from "../types";
-import { fetchEmergencyAlerts } from "../services/alertService";
 
-const POLL_INTERVAL_MS = 30_000; // 30초마다 재조회
-
-export function useEmergencyAlerts(districtCode: string, deviceId: string) {
+export function useEmergencyAlerts(
+  lat: number,
+  lng: number,
+  _deviceId?: string
+) {
   const [alerts, setAlerts] = useState<EmergencyAlert[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!districtCode || !deviceId) return;
+    if (!lat || !lng) return;
+    setLoading(true);
+    setError(null);
     try {
-      setError(null);
-      const data = await fetchEmergencyAlerts(districtCode, deviceId);
-      setAlerts(data);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "오류가 발생했습니다.");
+      // ✅ /latest 엔드포인트 사용
+      const res = await fetch(
+        `/api/evacuation/threats/alerts/latest?lat=${lat}&lng=${lng}`
+      );
+      if (res.status === 204) {
+        setAlerts([]);
+        return;
+      }
+      if (!res.ok) throw new Error();
+      const data: EmergencyAlert = await res.json();
+      setAlerts([data]);
+    } catch {
+      setError("재난 알림을 불러올 수 없습니다.");
     } finally {
       setLoading(false);
     }
-  }, [districtCode, deviceId]);
+  }, [lat, lng]);
 
   useEffect(() => {
-    setLoading(true);
     load();
-    const timer = setInterval(load, POLL_INTERVAL_MS);
-    return () => clearInterval(timer);
+    const interval = setInterval(load, 60_000);
+    return () => clearInterval(interval);
   }, [load]);
 
   const dismiss = useCallback((id: string) => {
     setAlerts((prev) => prev.filter((a) => a.id !== id));
   }, []);
 
-  return { alerts, loading, error, refetch: load, dismiss };
+  return { alerts, loading, error, dismiss };
 }

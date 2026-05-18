@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const DEVICE_ID_KEY = "peacelink_device_id";
@@ -12,54 +12,45 @@ function generateDeviceId(): string {
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleStart = async () => {
-    setLoading(true);
-    setError(null);
+  useEffect(() => {
+    async function autoRegister() {
+      try {
+        // 이미 등록된 경우 바로 홈으로
+        const existingUserId = localStorage.getItem(USER_ID_KEY);
+        if (existingUserId) {
+          navigate("/", { replace: true });
+          return;
+        }
 
-    try {
-      // 1. deviceId 준비
-      let deviceId = localStorage.getItem(DEVICE_ID_KEY);
-      if (!deviceId) {
-        deviceId = generateDeviceId();
-        localStorage.setItem(DEVICE_ID_KEY, deviceId);
-      }
+        let deviceId = localStorage.getItem(DEVICE_ID_KEY);
+        if (!deviceId) {
+          deviceId = generateDeviceId();
+          localStorage.setItem(DEVICE_ID_KEY, deviceId);
+        }
 
-      // 2. userId 이미 있으면 API 스킵
-      let userId = localStorage.getItem(USER_ID_KEY);
-      if (!userId) {
         const res = await fetch("/api/user/register-device", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ deviceId }),  // language는 옵셔널이라 생략
+          body: JSON.stringify({ deviceId, language: "ko" }), // language 추가
         });
 
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(`서버 오류: ${res.status} ${text}`);
-        }
+        if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
 
         const data = await res.json();
-        console.log("register-device 응답:", data); // 확인용
+        localStorage.setItem(USER_ID_KEY, String(data.userId));
 
-        // 백엔드 응답: { userId: UUID, deviceId, name, language, isNewUser }
-        userId = String(data.userId);  // UUID → string
-        localStorage.setItem(USER_ID_KEY, userId);
+        navigate("/", { replace: true });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "등록에 실패했습니다.");
       }
-
-      // 3. 홈으로 이동
-      navigate("/", { replace: true });
-
-    } catch (err) {
-      console.error(err);
-      setError(err instanceof Error ? err.message : "등록에 실패했습니다.");
-    } finally {
-      setLoading(false);
     }
-  };
 
+    autoRegister();
+  }, []);
+
+  // 등록 중 로딩 화면
   return (
     <div style={styles.page}>
       <div style={styles.card}>
@@ -67,16 +58,16 @@ export default function LoginPage() {
           <span style={{ color: "#1e293b" }}>Peace</span>
           <span style={{ color: "#3b82f6" }}>link</span>
         </h1>
-        <p style={styles.desc}>
-          재난 상황에서 가장 가까운 대피소를<br />
-          빠르게 안내해드립니다.
-        </p>
-
-        {error && <p style={styles.error}>{error}</p>}
-
-        <button style={styles.btn} onClick={handleStart} disabled={loading}>
-          {loading ? "준비 중..." : "시작하기 ➤"}
-        </button>
+        {error ? (
+          <>
+            <p style={styles.error}>{error}</p>
+            <button style={styles.btn} onClick={() => window.location.reload()}>
+              다시 시도
+            </button>
+          </>
+        ) : (
+          <p style={styles.desc}>준비 중...</p>
+        )}
       </div>
     </div>
   );

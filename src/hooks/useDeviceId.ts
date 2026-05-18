@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
-const DEVICE_ID_KEY = "peacelink_device_id";
-const USER_ID_KEY = "peacelink_user_id";
+export const DEVICE_ID_KEY = "peacelink_device_id";
+export const USER_ID_KEY = "peacelink_user_id";
 
 function generateDeviceId(): string {
   const timestamp = Date.now().toString(36);
@@ -14,11 +14,33 @@ export function useDeviceId() {
   const [userId, setUserId] = useState("");
 
   useEffect(() => {
-    // 저장된 값 불러오기
-    const savedDeviceId = localStorage.getItem(DEVICE_ID_KEY) ?? "";
-    const savedUserId = localStorage.getItem(USER_ID_KEY) ?? "";
-    setDeviceId(savedDeviceId);
-    setUserId(savedUserId);
+    async function initDevice() {
+      let did = localStorage.getItem(DEVICE_ID_KEY);
+      if (!did) {
+        did = generateDeviceId();
+        localStorage.setItem(DEVICE_ID_KEY, did);
+      }
+      setDeviceId(did);
+
+      try {
+        const res = await fetch("/api/user/register-device", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ deviceId: did }),
+        });
+        if (res.ok) {
+          const data: { userId: string } = await res.json();
+          localStorage.setItem(USER_ID_KEY, data.userId);
+          setUserId(data.userId);
+        }
+      } catch (e) {
+        const saved = localStorage.getItem(USER_ID_KEY) ?? "";
+        setUserId(saved);
+        console.error("유저 등록 실패:", e);
+      }
+    }
+
+    initDevice();
   }, []);
 
   return { deviceId, userId };

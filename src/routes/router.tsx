@@ -5,6 +5,7 @@ import LoginPage from "@/pages/LoginPage";
 import ReportPage from "@/pages/ReportPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import CommPage from "@/pages/CommPage";
+import ResultPage from "@/pages/ResultPage";
 
 const USER_ID_KEY = "peacelink_user_id";
 
@@ -39,6 +40,14 @@ export default function Router() {
             element={
               <PrivateRoute>
                 <CommPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/result"
+            element={
+              <PrivateRoute>
+                <ResultPage />
               </PrivateRoute>
             }
           />
