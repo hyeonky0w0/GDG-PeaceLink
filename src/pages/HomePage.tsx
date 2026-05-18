@@ -15,8 +15,13 @@ import {
   type NearestShelterResponse,
   type EvacuationRouteResponse,
   type SituationItem,
-} from "../services/evacuationApi";
+} from "../api/evacuationApi";
 import styles from "../styles/HomePage.module.css";
+
+
+import map from "../images/map.svg"
+import logoSvg from "../images/Peacelink.svg"
+import down from "../images/chevron-down.svg"
 
 // ── 마커 이미지 ──────────────────────────────────────────────
 
@@ -179,17 +184,16 @@ export default function HomePage() {
       {/* ── Header ── */}
       <header className={styles.header}>
         <a href="/" className={styles.logo}>
-          <span className={styles.logoText}>Peace</span>
-          <span className={styles.logoAccent}>link</span>
+          <img src={logoSvg} alt="PeaceLink" height={32} />
         </a>
         <div className={styles.locationRow}>
           <button
             className={styles.locationBtn}
             onClick={() => setLocationModalOpen(true)}
           >
-            <span className={styles.locationPin}>📍</span>
+            <span className={styles.locationPin}><img src={map} alt="map" height={10} /></span>
             <span className={styles.locationName}>{location.district.name}</span>
-            <span className={styles.locationArrow}>⌄</span>
+            <span className={styles.locationArrow}><img src={down} height={10} /></span>
           </button>
           <span className={styles.locationSub}>현재 위치 기준</span>
         </div>

@@ -1,6 +1,8 @@
 import type { EmergencyAlert } from "../types";
 import styles from "../styles/EmergencyBanner.module.css";
 
+
+
 const ICON_MAP = {
   critical: "⚠️",
   warning: "🔔",

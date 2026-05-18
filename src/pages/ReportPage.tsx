@@ -44,7 +44,8 @@ type MediaTab = "photo" | "audio";
 
 export default function ReportPage() {
   const navigate = useNavigate();
-  const userId = localStorage.getItem("userId") ?? "";
+  const USER_ID_KEY = "peacelink_user_id";
+  const userId = localStorage.getItem(USER_ID_KEY) ?? "";
 
   // 제보 유형
   const [selectedType, setSelectedType] = useState<ReportType>(REPORT_TYPES[0]);
@@ -164,6 +165,11 @@ export default function ReportPage() {
 
   const handleSubmit = async () => {
     setSubmitting(true);
+
+    if (!userId) {
+      alert("사용자 정보를 불러올 수 없습니다. 앱을 다시 시작해주세요.");
+      return;
+    }
     try {
       const audioFile = audioBlob
         ? new File([audioBlob], "recording.aac", { type: "audio/aac" })

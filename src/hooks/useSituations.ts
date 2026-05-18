@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { fetchSituations, type SituationItem } from "../services/evacuationApi";
+import { fetchSituations, type SituationItem } from "../api/evacuationApi";
 
 export function useSituations(lat: number, lng: number) {
   const [situations, setSituations] = useState<SituationItem[]>([]);
@@ -22,8 +22,8 @@ export function useSituations(lat: number, lng: number) {
 
   useEffect(() => {
     load();
-    // 30초마다 폴링
-    const interval = setInterval(load, 30_000);
+    // 30분마다 폴링
+    const interval = setInterval(load, 30 * 60 * 1000);
     return () => clearInterval(interval);
   }, [load]);
 

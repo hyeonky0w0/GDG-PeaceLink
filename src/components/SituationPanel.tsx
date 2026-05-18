@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { SituationItem } from "../services/evacuationApi";
+import type { SituationItem } from "../api/evacuationApi";
 import styles from "../styles/SituationPanel.module.css";
 
 type SituationLevel = "높음" | "중간" | "낮음" | "안전";
