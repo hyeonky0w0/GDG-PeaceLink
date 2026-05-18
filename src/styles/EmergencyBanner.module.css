@@ -1,0 +1,122 @@
+.banner {
+  border-radius: 14px;
+  margin: 8px 16px;
+  padding: 11px 15px;
+  border: none; /* 테두리 제거 */
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* critical → 이미지처럼 연한 핑크 */
+.banner.critical {
+  background: #FDECEA;
+}
+
+.banner.warning {
+  background: #FFF8E6;
+}
+
+.banner.info {
+  background: #EBF4FF;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.labelGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon {
+  font-size: 15px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.label.critical { color: #E53E3E; }
+.label.warning  { color: #D97706; }
+.label.info     { color: #2B6CB0; }
+
+/* 검증됨 pill 배지 */
+.badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.badge_critical {
+  background: #FBBFBF;
+  color: #C53030;
+}
+
+.badge_warning {
+  background: #FDE68A;
+  color: #92400E;
+}
+
+.badge_info {
+  background: #BEE3F8;
+  color: #2C5282;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #a0aec0;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+
+.message {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+  font-weight: 400;
+}
+
+.message.critical { color: #2D2D2D; }
+.message.warning  { color: #2D2D2D; }
+.message.info     { color: #2D2D2D; }
+
+/* 스켈레톤 */
+.skeleton {
+  background: #ffffff;
+  border-radius: 14px;
+  margin: 8px 16px;
+  padding: 14px;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.skeletonLine {
+  height: 12px;
+  background: #e8e8e8;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.skeletonLine:last-child {
+  width: 60%;
+  margin-bottom: 0;
+}

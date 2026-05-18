@@ -1,0 +1,292 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: #f5f6f8;
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ── 헤더 ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.refreshBtn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+.refreshBtn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* ── 탭 ── */
+.tabs {
+  display: flex;
+  background: #fff;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 8px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  color: #9ca3af;
+  transition: all 0.15s;
+}
+
+.tabActive {
+  color: #ef4444;
+  border-bottom-color: #ef4444;
+}
+
+.tabCount {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.tabLabel {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ── 목록 ── */
+.list {
+  flex: 1;
+  padding: 12px 16px 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── 카드 ── */
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  position: relative;
+  transition: box-shadow 0.15s;
+}
+.card:hover {
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.category {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* ── 배지 ── */
+.badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.badgeApproved {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.badgeRejected {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.badgePending {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* ── 카드 텍스트 ── */
+.location {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0 0 2px;
+}
+
+.date {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0 0 6px;
+}
+
+.riskChip {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-top: 2px;
+}
+
+/* ── 상세 펼침 ── */
+.detail {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detailRow {
+  font-size: 13px;
+  color: #374151;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.detailLabel {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ca3af;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mediaRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.thumb {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  transition: opacity 0.15s;
+}
+.thumb:hover {
+  opacity: 0.8;
+}
+
+.chevron {
+  position: absolute;
+  bottom: 14px;
+  right: 16px;
+  font-size: 10px;
+  color: #d1d5db;
+}
+
+/* ── 상태 박스 ── */
+.stateBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 0;
+  gap: 12px;
+}
+
+.errorText {
+  font-size: 14px;
+  color: #ef4444;
+  margin: 0;
+}
+
+.emptyText {
+  font-size: 14px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.retryBtn {
+  font-size: 13px;
+  color: #ef4444;
+  background: #fee2e2;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #f0f0f0;
+  border-top-color: #ef4444;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
+.mediaIconRow {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.mediaIconItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #f7f8fa;
+  border-radius: 8px;
+  padding: 5px 10px;
+}
+
+.mediaIconImg {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  opacity: 0.7;
+}
+
+.mediaIconCount {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a5568;
+}

@@ -1,0 +1,89 @@
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.categoryItem {
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-surface, #fff);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.categoryHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: none;
+  border: none;
+  border-left: 4px solid #ccc;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.categoryHeader:active {
+  background: rgba(0,0,0,0.04);
+}
+
+.categoryIcon { font-size: 22px; }
+
+.categoryLabel {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text, #1a202c);
+}
+
+.categoryLevel {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.categoryCount {
+  font-size: 13px;
+  color: #718096;
+  background: #f0f4f8;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.categoryArrow {
+  font-size: 11px;
+  color: #a0aec0;
+}
+
+/* 상세 목록 */
+.detailList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid #f0f4f8;
+}
+
+.detailItem {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f7fafc;
+}
+
+.detailItem:last-child { border-bottom: none; }
+
+.detailTop {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.detailLevel { font-size: 12px; font-weight: 700; }
+.detailTime { font-size: 12px; color: #a0aec0; }
+.detailTitle { font-size: 14px; color: #2d3748; margin: 2px 0; }
+.detailLocation { font-size: 12px; color: #718096; margin: 0; }
+
+.msg { font-size: 13px; color: #a0aec0; padding: 8px 16px; }
+.error { font-size: 13px; color: #e53e3e; padding: 8px 16px; }

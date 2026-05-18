@@ -12,6 +12,7 @@
   "dependencies": {
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "react-kakao-maps-sdk": "^1.2.1",
     "react-router-dom": "^7.15.0"
   },
   "devDependencies": {
@@ -28,6 +29,7 @@
     "tailwindcss": "^4.2.4",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
-    "vite": "^8.0.10"
+    "vite": "^8.0.10",
+    "vite-plugin-pwa": "^1.3.0"
   }
 }
