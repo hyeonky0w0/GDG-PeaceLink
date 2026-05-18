@@ -14,7 +14,7 @@ import {
   createEvacuationRoute,
   type NearestShelterResponse,
   type EvacuationRouteResponse,
-  type SituationItem,
+
 } from "../api/evacuationApi";
 import styles from "../styles/HomePage.module.css";
 
@@ -113,7 +113,7 @@ export default function HomePage() {
   const [shelterError, setShelterError] = useState<string | null>(null);
 
   // 경로
-  const [routeResult, setRouteResult] = useState<EvacuationRouteResponse | null>(null);
+  const [, setRouteResult] = useState<EvacuationRouteResponse | null>(null);
   const [routeLoading, setRouteLoading] = useState(false);
   const [routeError, setRouteError] = useState<string | null>(null);
 
