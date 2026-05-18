@@ -9,7 +9,7 @@ export type ReportType =
   | "OTHER_DANGER";
 
 export type RiskLevel = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
-export type ReportStatus = "PENDING" | "APPROVED" | "REJECTED";
+export type ReportStatus = "VERIFIED" | "REJECTED";  
 
 export interface ReportResponse {
   id: string;
@@ -36,11 +36,9 @@ export const REPORT_TYPE_LABEL: Record<ReportType, string> = {
 };
 
 export const STATUS_LABEL: Record<ReportStatus, string> = {
-  PENDING: "대기",
-  APPROVED: "승인",
-  REJECTED: "거부",
+  VERIFIED: "승인",   
+  REJECTED: "거부",   
 };
-
 export const RISK_LABEL: Record<RiskLevel, string> = {
   LOW: "낮음",
   MEDIUM: "중간",
@@ -101,16 +99,15 @@ export function useMyReports(userId: string | null) {
   }, [load]);
 
   const getFiltered = (tab: "전체" | "제보 승인" | "제보 거부") => {
-    if (tab === "전체") return reports;
-    if (tab === "제보 승인") return reports.filter((r) => r.status === "APPROVED");
-    return reports.filter((r) => r.status === "REJECTED");
-  };
+  if (tab === "전체") return reports;
+  if (tab === "제보 승인") return reports.filter((r) => r.status === "VERIFIED"); 
+  return reports.filter((r) => r.status === "REJECTED");
+};
 
   const counts = {
-    전체: reports.length,
-    "제보 승인": reports.filter((r) => r.status === "APPROVED").length,
-    "제보 거부": reports.filter((r) => r.status === "REJECTED").length,
-  };
-
+  전체: reports.length,
+  "제보 승인": reports.filter((r) => r.status === "VERIFIED").length,  
+  "제보 거부": reports.filter((r) => r.status === "REJECTED").length,
+};
   return { reports, getFiltered, counts, loading, error, reload: load };
 }

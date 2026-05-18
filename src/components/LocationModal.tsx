@@ -4,18 +4,19 @@ import styles from "../styles/LocationModal.module.css";
 
 interface Props {
   current: District;
-  onSelect: (district: District) => void;
+  onSelect: (district: District, lat: number, lng: number) => void; 
   onDetectGPS: () => Promise<void>;
   onClose: () => void;
 }
 
 export function LocationModal({ current, onSelect, onDetectGPS, onClose }: Props) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<District[]>([]);
+  const [results, setResults] = useState<{ district: District; lat: number; lng: number }[]>([]);
   const [searching, setSearching] = useState(false);
   const [gpsLoading, setGpsLoading] = useState(false);
   const [gpsError, setGpsError] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  
 
   // 입력할 때마다 카카오 주소 검색
   useEffect(() => {
@@ -29,28 +30,32 @@ export function LocationModal({ current, onSelect, onDetectGPS, onClose }: Props
     debounceRef.current = setTimeout(() => {
       setSearching(true);
       const geocoder = new window.kakao.maps.services.Geocoder();
-      geocoder.addressSearch(trimmed, (data: any[], status: string) => {
-        setSearching(false);
-        if (status !== window.kakao.maps.services.Status.OK) {
-          setResults([]);
-          return;
-        }
-        // 시·군·구 단위로 중복 제거해서 District 목록 생성
-        const seen = new Set<string>();
-        const districts: District[] = [];
-        for (const item of data) {
-          const name = `${item.address.region_1depth_name} ${item.address.region_2depth_name}`;
-          if (!seen.has(name)) {
-            seen.add(name);
-            districts.push({
-              code: item.address.region_2depth_h_code ?? item.address.b_code.slice(0, 5),
-              name,
-            });
-          }
-        }
-        setResults(districts);
+      // geocoder 결과 파싱 시 좌표 저장
+geocoder.addressSearch(trimmed, (data: any[], status: string) => {
+  setSearching(false);
+  if (status !== window.kakao.maps.services.Status.OK) {
+    setResults([]);
+    return;
+  }
+  const seen = new Set<string>();
+  const districts: { district: District; lat: number; lng: number }[] = [];
+  for (const item of data) {
+    const name = `${item.address.region_1depth_name} ${item.address.region_2depth_name}`;
+    if (!seen.has(name)) {
+      seen.add(name);
+      districts.push({
+        district: {
+          code: item.address.region_2depth_h_code ?? item.address.b_code.slice(0, 5),
+          name,
+        },
+        lat: parseFloat(item.y), 
+        lng: parseFloat(item.x), 
       });
-    }, 300); // 300ms 디바운스
+    }
+  }
+  setResults(districts);
+});
+    }, 300);
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -70,11 +75,10 @@ export function LocationModal({ current, onSelect, onDetectGPS, onClose }: Props
     }
   };
 
-  const handleSelect = (district: District) => {
-    onSelect(district);
-    onClose();
-  };
-
+const handleSelect = ({ district, lat, lng }: { district: District; lat: number; lng: number }) => {
+  onSelect(district, lat, lng); 
+  onClose();
+};
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.sheet} onClick={(e) => e.stopPropagation()}>
@@ -114,15 +118,16 @@ export function LocationModal({ current, onSelect, onDetectGPS, onClose }: Props
               검색 중...
             </p>
           )}
-          {!searching && results.map((d) => (
+          {!searching && results.map(({ district: d, lat, lng }) => (
             <button
               key={d.code}
               className={`${styles.districtItem} ${d.code === current.code ? styles.active : ""}`}
-              onClick={() => handleSelect(d)}
+              onClick={() => handleSelect({ district: d, lat, lng })}
             >
               {d.name}
             </button>
           ))}
+
           {!searching && query.trim() && results.length === 0 && (
             <p style={{ padding: "16px", fontSize: 13, color: "#a0aec0", textAlign: "center" }}>
               검색 결과가 없습니다
