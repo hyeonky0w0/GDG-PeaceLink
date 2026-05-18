@@ -277,11 +277,6 @@ export default function HomePage() {
                     </p>
                   </div>
                 </div>
-                {routeResult && (
-                  <p style={{ fontSize: 12, color: "#3b82f6", marginBottom: 6 }}>
-                    ✅ 경로 저장됨 ({routeResult.shelterCode})
-                  </p>
-                )}
                 {routeError && (
                   <p style={{ fontSize: 12, color: "#e53e3e", marginBottom: 6 }}>
                     {routeError}
@@ -348,7 +343,7 @@ export default function HomePage() {
       {locationModalOpen && (
         <LocationModal
           current={location.district}
-          onSelect={(district) => updateLocation(district, location.lat, location.lng)}
+          onSelect={(district, lat, lng) => updateLocation(district, lat, lng)} // ✅ 새 좌표 전달
           onDetectGPS={detectGPS}
           onClose={() => setLocationModalOpen(false)}
         />

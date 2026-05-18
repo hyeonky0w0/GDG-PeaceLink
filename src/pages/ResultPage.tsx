@@ -39,11 +39,11 @@ function ReportCard({ report }: { report: ReportResponse }) {
 
 
   const statusStyle =
-    report.status === "APPROVED"
+    report.status === "VERIFIED"   
       ? styles.badgeApproved
       : report.status === "REJECTED"
       ? styles.badgeRejected
-      : styles.badgePending;
+      : styles.badgePending
 
   return (
     <div className={styles.card} onClick={() => setOpen((v) => !v)}>
