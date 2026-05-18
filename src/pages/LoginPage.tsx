@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import login from "../images/login.svg";
+import logoSvg from "../images/Peacelink.svg";
+
 const DEVICE_ID_KEY = "peacelink_device_id";
 const USER_ID_KEY = "peacelink_user_id";
 
@@ -13,61 +16,79 @@ function generateDeviceId(): string {
 export default function LoginPage() {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  async function doRegister() {
+    setLoading(true);
+    setError(null);
+    try {
+      const existingUserId = localStorage.getItem(USER_ID_KEY);
+      if (existingUserId) {
+        navigate("/", { replace: true });
+        return;
+      }
+
+      let deviceId = localStorage.getItem(DEVICE_ID_KEY);
+      if (!deviceId) {
+        deviceId = generateDeviceId();
+        localStorage.setItem(DEVICE_ID_KEY, deviceId);
+      }
+
+      const res = await fetch("/api/user/register-device", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceId, language: "ko" }),
+      });
+
+      if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
+
+      const data = await res.json();
+      localStorage.setItem(USER_ID_KEY, String(data.userId));
+      navigate("/", { replace: true });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "등록에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function autoRegister() {
-      try {
-        // 이미 등록된 경우 바로 홈으로
-        const existingUserId = localStorage.getItem(USER_ID_KEY);
-        if (existingUserId) {
-          navigate("/", { replace: true });
-          return;
-        }
-
-        let deviceId = localStorage.getItem(DEVICE_ID_KEY);
-        if (!deviceId) {
-          deviceId = generateDeviceId();
-          localStorage.setItem(DEVICE_ID_KEY, deviceId);
-        }
-
-        const res = await fetch("/api/user/register-device", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ deviceId, language: "ko" }), // language 추가
-        });
-
-        if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
-
-        const data = await res.json();
-        localStorage.setItem(USER_ID_KEY, String(data.userId));
-
-        navigate("/", { replace: true });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "등록에 실패했습니다.");
-      }
-    }
-
-    autoRegister();
+    doRegister();
   }, []);
 
-  // 등록 중 로딩 화면
   return (
     <div style={styles.page}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>
-          <span style={{ color: "#1e293b" }}>Peace</span>
-          <span style={{ color: "#3b82f6" }}>link</span>
-        </h1>
-        {error ? (
-          <>
-            <p style={styles.error}>{error}</p>
-            <button style={styles.btn} onClick={() => window.location.reload()}>
-              다시 시도
-            </button>
-          </>
-        ) : (
-          <p style={styles.desc}>준비 중...</p>
-        )}
+      {/* 로고 */}
+      <div style={styles.logoArea}>
+        <img src={logoSvg} alt="Peacelink" style={styles.logo} />
+      </div>
+
+      {/* 설명 텍스트 */}
+      <p style={styles.subtitle}>
+        실시간 위험 정보를 기반으로<br />더 안전한 길을 안내해요
+      </p>
+
+      {/* 일러스트 */}
+      <div style={styles.illustrationArea}>
+        <img src={login} alt="illustration" style={styles.illustration} />
+      </div>
+
+      {/* 에러 메시지 */}
+      {error && <p style={styles.error}>{error}</p>}
+
+      {/* 시작하기 버튼 */}
+      <div style={styles.buttonArea}>
+        <button
+          style={{
+            ...styles.btn,
+            opacity: loading ? 0.7 : 1,
+            cursor: loading ? "not-allowed" : "pointer",
+          }}
+          onClick={error ? doRegister : undefined}
+          disabled={loading && !error}
+        >
+          {loading && !error ? "로딩 중..." : "시작하기"}
+        </button>
       </div>
     </div>
   );
@@ -75,46 +96,64 @@ export default function LoginPage() {
 
 const styles: Record<string, React.CSSProperties> = {
   page: {
-    minHeight: "100vh",
+    minHeight: "100dvh",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    background: "#ffffff",
+    padding: "0 24px",
+    boxSizing: "border-box",
+  },
+  logoArea: {
+    marginTop: "72px",
+    marginBottom: "12px",
+  },
+  logo: {
+    height: 30,
+    objectFit: "contain",
+  },
+  subtitle: {
+    textAlign: "center",
+    color: "#555",
+    fontSize: 13,
+    lineHeight: 1.75,
+    margin: "0 0 32px",
+  },
+  illustrationArea: {
+    flex: 1,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: "#f0f4ff",
+    width: "50%",
+    maxHeight: 400,
   },
-  card: {
-    background: "#fff",
-    borderRadius: 20,
-    padding: "48px 36px",
-    textAlign: "center",
-    boxShadow: "0 8px 32px #0001",
-    maxWidth: 360,
+  illustration: {
     width: "100%",
-  },
-  title: {
-    fontSize: 36,
-    fontWeight: 800,
-    margin: "0 0 12px",
-  },
-  desc: {
-    color: "#64748b",
-    fontSize: 15,
-    lineHeight: 1.7,
-    margin: "0 0 32px",
+    maxWidth: 320,
+    objectFit: "contain",
   },
   error: {
-    color: "#e53e3e",
+    color: "#EB504E",
     fontSize: 13,
-    marginBottom: 12,
+    textAlign: "center",
+    marginBottom: 6,
+  },
+  buttonArea: {
+    width: "100%",
+    padding: "24px 0 40px",
   },
   btn: {
     width: "100%",
     padding: "14px 0",
-    background: "#3b82f6",
+    background: "#EB504E",
     color: "#fff",
     border: "none",
-    borderRadius: 12,
-    fontSize: 16,
+    borderRadius: 14,
+    fontSize: 17,
     fontWeight: 700,
-    cursor: "pointer",
+    letterSpacing: "-0.3px",
+
+    transition: "opacity 0.15s",
   },
 };

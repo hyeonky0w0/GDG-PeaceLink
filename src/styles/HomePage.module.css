@@ -5,8 +5,7 @@
   max-width: 402px;
   min-height: 100dvh;
   margin: 0 auto;
-  background: #f8f8f8;
-  font-family: "Noto Sans KR", -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #ffffff;
   display: flex;
   flex-direction: column;
 }
@@ -15,7 +14,6 @@
 .header {
   background: #ffffff;
   padding: 14px 18px 10px;
-  border-bottom: 1px solid #eee;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -92,7 +90,6 @@
   font-size: 11px;
   color: #718096;
   margin-top: 6px;
-  font-family: "SF Mono", "Fira Code", monospace;
 }
 
 .deviceDot {
@@ -208,16 +205,17 @@
 
 /* ── Report Banner ── */
 .reportBanner {
-  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 60%, #60a5fa 100%);
-  margin: 12px 14px 24px;
-  border-radius: 16px;
-  padding: 18px 20px;
+  background: linear-gradient(135deg, #F0384A 0%, #F5536A 40%, #FF7096 100%);
+  margin: 24px 14px 24px; /* 위 margin 늘려서 삐져나올 공간 확보 */
+  border-radius: 20px;
+  padding: 22px 0 22px 22px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  overflow: hidden;
+  overflow: visible; /* hidden → visible 로 변경 */
   position: relative;
+  min-height: 140px;
 }
 
 .reportTextGroup {
@@ -225,29 +223,32 @@
 }
 
 .reportTitle {
-  margin: 0 0 4px;
-  font-size: 15px;
-  font-weight: 700;
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 800;
   color: #ffffff;
+  line-height: 1.3;
+  letter-spacing: -0.5px;
 }
 
 .reportDesc {
-  margin: 0 0 12px;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.6;
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.65;
 }
 
 .reportBtn {
   background: #ffffff;
-  color: #2563eb;
+  color: #F0384A;
   border: none;
-  border-radius: 8px;
-  padding: 8px 18px;
-  font-size: 13px;
+  border-radius: 10px;
+  padding: 10px 24px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   transition: opacity 0.15s;
+  letter-spacing: -0.3px;
 }
 
 .reportBtn:hover {
@@ -256,26 +257,19 @@
 
 .reportIllustration {
   flex-shrink: 0;
-  width: 64px;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start; /* 위쪽 정렬 */
+  align-self: flex-start;
+  margin-top: -22px; /* 카드 위로 삐져나오는 양 조절 */
+
 }
 
-.reportPhone {
-  width: 48px;
-  height: 76px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform: rotate(8deg);
-}
-
-.reportPhoneIcon {
-  font-size: 22px;
+.reportPhoneImg {
+  height: auto; /* 충분히 크게 */
+  width: 170px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0px 8px 16px rgba(0,0,0,0.25));
 }
 
 /* ── Loading / Error ── */
@@ -389,7 +383,7 @@
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: #f7f8fa;
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;

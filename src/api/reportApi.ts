@@ -1,6 +1,7 @@
 const BASE_URL = "http://localhost:8080/api";
 
 const TYPE_MAP: Record<string, string> = {
+  flood:  "FLOOD",
   fire:   "FIRE_SMOKE",
   bomb:   "EXPLOSION_ATTACK",
   rescue: "RESCUE_REQUEST",

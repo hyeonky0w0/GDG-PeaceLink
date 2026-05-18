@@ -22,6 +22,7 @@ import styles from "../styles/HomePage.module.css";
 import map from "../images/map.svg"
 import logoSvg from "../images/Peacelink.svg"
 import down from "../images/chevron-down.svg"
+import phone from "../images/phone.svg"
 
 // ── 마커 이미지 ──────────────────────────────────────────────
 
@@ -313,9 +314,7 @@ export default function HomePage() {
             </button>
           </div>
           <div className={styles.reportIllustration}>
-            <div className={styles.reportPhone}>
-              <span className={styles.reportPhoneIcon}>⚠️</span>
-            </div>
+            <img src={phone} alt="제보 폰" className={styles.reportPhoneImg} />
           </div>
         </div>
 
@@ -340,7 +339,6 @@ export default function HomePage() {
     error={situationError}
   />
 
-  <button className={styles.situationMore}>상황 더보기 &gt;</button>
 </section>
 
       </div>

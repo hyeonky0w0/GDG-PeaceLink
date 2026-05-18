@@ -23,8 +23,17 @@
   transition: color 0.15s;
 }
 
+.navIcon img {
+  filter: brightness(0) invert(70%); /* 회색 */
+  transition: filter 0.15s;
+}
+
+.navItemActive .navIcon img {
+  filter: brightness(0) saturate(100%) invert(40%) sepia(90%) saturate(600%) hue-rotate(320deg); /* #EB504E */
+}
+
 .navItemActive {
-  color: #3b82f6;
+  color: #EB504E;
 }
 
 .navIcon { font-size: 20px; }
