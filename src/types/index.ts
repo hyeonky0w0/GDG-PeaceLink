@@ -4,6 +4,7 @@ export interface EmergencyAlert {
   level: "critical" | "warning" | "info";
   shelterCode?: string;
   createdAt: string;
+  verified?: boolean;
 }
 
 export interface Shelter {

@@ -1,10 +1,8 @@
-/* EmergencyBanner.module.css */
-
 .banner {
-  border-radius: 10px;
-  margin: 10px 14px;
-  padding: 12px 14px;
-  border: 1px solid;
+  border-radius: 14px;
+  margin: 8px 16px;
+  padding: 11px 15px;
+  border: none; /* 테두리 제거 */
   animation: fadeIn 0.3s ease;
 }
 
@@ -13,26 +11,24 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* critical → 이미지처럼 연한 핑크 */
 .banner.critical {
-  background: #fff5f5;
-  border-color: #feb2b2;
+  background: #FDECEA;
 }
 
 .banner.warning {
-  background: #fffbeb;
-  border-color: #fbd38d;
+  background: #FFF8E6;
 }
 
 .banner.info {
-  background: #ebf8ff;
-  border-color: #bee3f8;
+  background: #EBF4FF;
 }
 
 .topRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
 }
 
 .labelGroup {
@@ -42,19 +38,41 @@
 }
 
 .icon {
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: -0.3px;
 }
 
-.label.critical { color: #c53030; }
-.label.warning  { color: #b7791f; }
-.label.info     { color: #2b6cb0; }
+.label.critical { color: #E53E3E; }
+.label.warning  { color: #D97706; }
+.label.info     { color: #2B6CB0; }
+
+/* 검증됨 pill 배지 */
+.badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.badge_critical {
+  background: #FBBFBF;
+  color: #C53030;
+}
+
+.badge_warning {
+  background: #FDE68A;
+  color: #92400E;
+}
+
+.badge_info {
+  background: #BEE3F8;
+  color: #2C5282;
+}
 
 .closeBtn {
   background: none;
@@ -67,19 +85,21 @@
 }
 
 .message {
-  font-size: 13px;
-  line-height: 1.55;
+  font-size: 14px;
+  line-height: 1.6;
   margin: 0;
+  font-weight: 400;
 }
 
-.message.critical { color: #742a2a; }
-.message.warning  { color: #744210; }
-.message.info     { color: #1a365d; }
+.message.critical { color: #2D2D2D; }
+.message.warning  { color: #2D2D2D; }
+.message.info     { color: #2D2D2D; }
 
+/* 스켈레톤 */
 .skeleton {
-  background: #f0f0f0;
-  border-radius: 10px;
-  margin: 10px 14px;
+  background: #ffffff;
+  border-radius: 14px;
+  margin: 8px 16px;
   padding: 14px;
   animation: pulse 1.2s ease-in-out infinite;
 }
@@ -91,7 +111,7 @@
 
 .skeletonLine {
   height: 12px;
-  background: #e0e0e0;
+  background: #e8e8e8;
   border-radius: 6px;
   margin-bottom: 8px;
 }

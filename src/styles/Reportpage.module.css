@@ -6,7 +6,7 @@
   max-width: 402px;
   min-height: 874px;
   margin: 0 auto;
-  background: #f7f8fa;
+  background: #ffffff;
   display: flex;
   flex-direction: column;
   font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
@@ -153,9 +153,10 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #f7f8fa;
+  background: #fff;
   border-radius: 12px;
   padding: 12px;
+  border: solid 1px #eeeeee;
 }
 
 .locationMapThumb {
@@ -312,40 +313,83 @@
 .audioRecorder {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 20px 0;
+  gap: 16px;
+  padding: 4px 0;
 }
 
-.audioBtn {
+.waveBarWrap {
+  position: relative;
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 14px 28px;
-  background: #fee2e2;
-  color: #ef4444;
+}
+
+.waveBarImg {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  display: block;
+}
+
+.waveTimeOverlay {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.audioControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.audioCancelBtn {
+  background: none;
   border: none;
-  border-radius: 50px;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4a5568;
   cursor: pointer;
-  letter-spacing: -0.01em;
-  transition: background 0.15s;
+  padding: 4px 8px;
 }
 
-.audioBtn:hover {
-  background: #fecaca;
+.audioCompleteBtn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 4px 8px;
 }
 
-.audioIcon {
-  font-size: 20px;
+.audioCompleteBtn:disabled {
+  color: #d1d5db;
+  cursor: default;
 }
 
-.audioHint {
-  font-size: 12px;
-  color: #a0aec0;
-  margin: 0;
+.audioCircleBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+/* 기존 waveBar 관련 클래스 삭제 가능 */
+.waveBar, .waveBarActive, .waveInner,
+.waveDots, .waveTime, .playBtn,
+.audioBtn, .audioIcon, .audioHint,
+.audioCircleBtnRec, .audioCircleBtnStop, .audioCircleBtnReset { display: none; }
 
 /* ── 텍스트에어리어 ── */
 .textareaWrap {
@@ -403,6 +447,11 @@
 
 .dangerIcon {
   font-size: 20px;
+}
+
+.warnIcon2{
+  max-width: 20px;
+  height: auto;
 }
 
 .dangerLevelLabel {
@@ -542,4 +591,176 @@
   border-radius: 12px;
   cursor: pointer;
   letter-spacing: -0.02em;
+}
+
+.typeIcon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+
+/* ── 음성 녹음 새 디자인 ── */
+.audioRecorder {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 8px 0;
+}
+
+.waveBar {
+  width: 100%;
+  background: #f0f2f5;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  transition: background 0.2s;
+}
+
+.waveBarActive {
+  background: #ef4444;
+}
+
+.waveInner {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.waveDots {
+  flex: 1;
+  height: 3px;
+  border-top: 3px dotted rgba(255,255,255,0.6);
+}
+
+.waveBar:not(.waveBarActive) .waveDots {
+  border-top-color: #d1d5db;
+}
+
+.waveTime {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  min-width: 36px;
+  text-align: right;
+}
+
+.waveBar:not(.waveBarActive) .waveTime {
+  color: #a0aec0;
+}
+
+.playBtn {
+  background: none;
+  border: none;
+  color: #4a5568;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.audioControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.audioCancelBtn,
+.audioCompleteBtn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: #4a5568;
+}
+
+.audioCompleteBtn {
+  color: #ef4444;
+}
+
+.audioCompleteBtn:disabled {
+  color: #d1d5db;
+  cursor: default;
+}
+
+.audioCircleBtn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.audioCircleBtnRec  { background: #ef4444; color: #fff; }
+.audioCircleBtnStop { background: #fff; border: 2px solid #ef4444; color: #ef4444; }
+.audioCircleBtnReset { background: #f0f2f5; color: #4a5568; }
+
+
+/* ── 미디어 선택 바텀시트 ── */
+.pickerOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 100;
+}
+
+.pickerSheet {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 402px;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  padding: 8px 0 40px;
+  z-index: 101;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+}
+
+.pickerItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.pickerItem:active {
+  background: #f7f8fa;
+}
+
+.pickerItemIcon {
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.pickerItemLabel {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a202c;
+  letter-spacing: -0.02em;
+}
+
+.pickerDivider {
+  height: 1px;
+  background: #f0f2f5;
+  margin: 0 24px;
 }

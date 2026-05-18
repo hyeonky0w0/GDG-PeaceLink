@@ -1,8 +1,6 @@
 import type { EmergencyAlert } from "../types";
 import styles from "../styles/EmergencyBanner.module.css";
 
-
-
 const ICON_MAP = {
   critical: "⚠️",
   warning: "🔔",
@@ -58,6 +56,11 @@ export function EmergencyBanner({ alerts, loading, error, onDismiss }: Props) {
               <span className={`${styles.label} ${styles[alert.level]}`}>
                 {LABEL_MAP[alert.level]}
               </span>
+              {alert.verified && (
+                <span className={`${styles.badge} ${styles[`badge_${alert.level}`]}`}>
+                  검증됨
+                </span>
+              )}
             </div>
             <button
               className={styles.closeBtn}

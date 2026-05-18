@@ -11,6 +11,9 @@ import {
 } from "../hooks/useMyReports";
 import styles from "../styles/MyReportsPage.module.css";
 
+import camera from "../images/camera.svg"
+import sound from "../images/sound.svg"
+
 // ← 여기서 useDeviceId() 호출하던 줄 2개 삭제 ✅
 
 // ── 탭 ───────────────────────────────────────────────────────
@@ -104,20 +107,32 @@ function ReportCard({ report }: { report: ReportResponse }) {
             </p>
           )}
 
-          {/* 미디어 썸네일 */}
-          {report.mediaUrls?.length > 0 && (
-            <div className={styles.mediaRow}>
-              {report.mediaUrls.map((url, i) => (
-                <img
-                  key={i}
-                  src={url}
-                  alt={`첨부 ${i + 1}`}
-                  className={styles.thumb}
-                  onClick={(e) => { e.stopPropagation(); window.open(url, "_blank"); }}
-                />
-              ))}
-            </div>
-          )}
+          {/* 미디어 아이콘 표시 */}
+{report.mediaUrls?.length > 0 && (() => {
+  const imageUrls = report.mediaUrls.filter(u =>
+    /\/(images|videos)\//i.test(u) || /\.(jpg|jpeg|png|gif|webp|mp4|mov|avi)(\?|$)/i.test(u)
+  );
+  const audioUrls = report.mediaUrls.filter(u =>
+    /\/audio\//i.test(u) || /\.(aac|mp3|wav|ogg|flac)(\?|$)/i.test(u)
+  );
+
+  return (
+    <div className={styles.mediaIconRow}>
+      {imageUrls.length > 0 && (
+        <div className={styles.mediaIconItem}>
+          <img src={camera} alt="이미지" className={styles.mediaIconImg} />
+          <span className={styles.mediaIconCount}>{imageUrls.length}개</span>
+        </div>
+      )}
+      {audioUrls.length > 0 && (
+        <div className={styles.mediaIconItem}>
+          <img src={sound} alt="음성" className={styles.mediaIconImg} />
+          <span className={styles.mediaIconCount}>음성 첨부</span>
+        </div>
+      )}
+    </div>
+  );
+})()}
         </div>
       )}
 
