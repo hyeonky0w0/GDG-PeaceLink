@@ -222,6 +222,23 @@ function CopyIcon() {
   );
 }
 
+function ToastCheckIcon() {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20 6L9 17l-5-5" />
+    </svg>
+  );
+}
+
 function shortLangCode(code: string) {
   return code.split("-")[0];
 }
@@ -732,8 +749,12 @@ export default function CommPage() {
         )}
       </main>
 
-      {copied && <div className="copyToast">복사되었습니다</div>}
-
+      {copied && (
+        <div className="copyToast" role="status" aria-live="polite">
+          <span>복사되었습니다</span>
+          <ToastCheckIcon />
+        </div>
+      )}
       <BottomNav />
     </div>
   );
