@@ -18,39 +18,50 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  async function doRegister() {
-    setLoading(true);
-    setError(null);
-    try {
-      const existingUserId = localStorage.getItem(USER_ID_KEY);
-      if (existingUserId) {
-        navigate("/", { replace: true });
-        return;
-      }
+async function doRegister() {
+  setLoading(true);
+  setError(null);
 
-      let deviceId = localStorage.getItem(DEVICE_ID_KEY);
-      if (!deviceId) {
-        deviceId = generateDeviceId();
-        localStorage.setItem(DEVICE_ID_KEY, deviceId);
-      }
+  try {
+    // 개발용 임시 로그인 우회
+    localStorage.setItem(USER_ID_KEY, "dev-user");
 
-      const res = await fetch("/api/user/register-device", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deviceId, language: "ko" }),
-      });
+    navigate("/", { replace: true });
 
-      if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
+    return;
 
-      const data = await res.json();
-      localStorage.setItem(USER_ID_KEY, String(data.userId));
+    // ↓ 서버 연결 다시 할 때 복구
+    /*
+    const existingUserId = localStorage.getItem(USER_ID_KEY);
+    if (existingUserId) {
       navigate("/", { replace: true });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "등록에 실패했습니다.");
-    } finally {
-      setLoading(false);
+      return;
     }
+
+    let deviceId = localStorage.getItem(DEVICE_ID_KEY);
+    if (!deviceId) {
+      deviceId = generateDeviceId();
+      localStorage.setItem(DEVICE_ID_KEY, deviceId);
+    }
+
+    const res = await fetch("/api/user/register-device", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ deviceId, language: "ko" }),
+    });
+
+    if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
+
+    const data = await res.json();
+    localStorage.setItem(USER_ID_KEY, String(data.userId));
+    navigate("/", { replace: true });
+    */
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "등록에 실패했습니다.");
+  } finally {
+    setLoading(false);
   }
+}
 
   useEffect(() => {
     doRegister();
