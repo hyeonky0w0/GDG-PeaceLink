@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
 
 import login from "../images/login.svg";
@@ -15,79 +16,84 @@ function generateDeviceId(): string {
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const hasRegisteredRef = useRef(false);
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-async function doRegister() {
-  setLoading(true);
-  setError(null);
+  const doRegister = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-  try {
-    // 개발용 임시 로그인 우회
-    localStorage.setItem(USER_ID_KEY, "dev-user");
+    try {
+      const existingUserId = localStorage.getItem(USER_ID_KEY);
 
-    navigate("/", { replace: true });
+      if (existingUserId) {
+        navigate("/", { replace: true });
+        return;
+      }
 
-    return;
+      let deviceId = localStorage.getItem(DEVICE_ID_KEY);
 
-    // ↓ 서버 연결 다시 할 때 복구
-    /*
-    const existingUserId = localStorage.getItem(USER_ID_KEY);
-    if (existingUserId) {
+      if (!deviceId) {
+        deviceId = generateDeviceId();
+        localStorage.setItem(DEVICE_ID_KEY, deviceId);
+      }
+
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
+
+      const res = await fetch(`${apiBaseUrl}/api/user/register-device`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceId, language: "ko" }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`서버 오류: ${res.status}`);
+      }
+
+      const data = await res.json();
+
+      localStorage.setItem(USER_ID_KEY, String(data.userId));
       navigate("/", { replace: true });
-      return;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "등록에 실패했습니다.");
+    } finally {
+      setLoading(false);
     }
-
-    let deviceId = localStorage.getItem(DEVICE_ID_KEY);
-    if (!deviceId) {
-      deviceId = generateDeviceId();
-      localStorage.setItem(DEVICE_ID_KEY, deviceId);
-    }
-
-    const res = await fetch("/api/user/register-device", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ deviceId, language: "ko" }),
-    });
-
-    if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
-
-    const data = await res.json();
-    localStorage.setItem(USER_ID_KEY, String(data.userId));
-    navigate("/", { replace: true });
-    */
-  } catch (err) {
-    setError(err instanceof Error ? err.message : "등록에 실패했습니다.");
-  } finally {
-    setLoading(false);
-  }
-}
+  }, [navigate]);
 
   useEffect(() => {
-    doRegister();
-  }, []);
+    if (hasRegisteredRef.current) return;
+
+    hasRegisteredRef.current = true;
+
+    const timer = window.setTimeout(() => {
+      void doRegister();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [doRegister]);
 
   return (
     <div style={styles.page}>
-      {/* 로고 */}
       <div style={styles.logoArea}>
         <img src={logoSvg} alt="Peacelink" style={styles.logo} />
       </div>
 
-      {/* 설명 텍스트 */}
       <p style={styles.subtitle}>
-        실시간 위험 정보를 기반으로<br />더 안전한 길을 안내해요
+        실시간 위험 정보를 기반으로
+        <br />더 안전한 길을 안내해요
       </p>
 
-      {/* 일러스트 */}
       <div style={styles.illustrationArea}>
         <img src={login} alt="illustration" style={styles.illustration} />
       </div>
 
-      {/* 에러 메시지 */}
       {error && <p style={styles.error}>{error}</p>}
 
-      {/* 시작하기 버튼 */}
       <div style={styles.buttonArea}>
         <button
           style={{
@@ -95,17 +101,17 @@ async function doRegister() {
             opacity: loading ? 0.7 : 1,
             cursor: loading ? "not-allowed" : "pointer",
           }}
-          onClick={error ? doRegister : undefined}
-          disabled={loading && !error}
+          onClick={() => void doRegister()}
+          disabled={loading}
         >
-          {loading && !error ? "로딩 중..." : "시작하기"}
+          {loading ? "로딩 중..." : "시작하기"}
         </button>
       </div>
     </div>
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
+const styles: Record<string, CSSProperties> = {
   page: {
     minHeight: "100dvh",
     display: "flex",
@@ -164,7 +170,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 17,
     fontWeight: 700,
     letterSpacing: "-0.3px",
-
     transition: "opacity 0.15s",
   },
 };

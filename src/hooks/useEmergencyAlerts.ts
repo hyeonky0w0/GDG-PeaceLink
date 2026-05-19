@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import type { EmergencyAlert } from "../types";
 
+const BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+
 export function useEmergencyAlerts(
   lat: number,
   lng: number,
@@ -15,10 +17,10 @@ export function useEmergencyAlerts(
     setLoading(true);
     setError(null);
     try {
-      // ✅ /latest 엔드포인트 사용
+      
       const res = await fetch(
-        `/api/evacuation/threats/alerts/latest?lat=${lat}&lng=${lng}`
-      );
+      `${BASE}/api/evacuation/threats/alerts/latest?lat=${lat}&lng=${lng}`
+    );
       if (res.status === 204) {
         setAlerts([]);
         return;
