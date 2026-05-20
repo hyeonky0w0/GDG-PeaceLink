@@ -64,6 +64,12 @@ type ExpertTerm = {
   desc: string;
 };
 
+type SourceGuide = {
+  empty: string;
+  listening: string;
+  placeholder: string;
+};
+
 const LANGUAGES: LangOption[] = [
   {
     label: "한국어",
@@ -102,6 +108,41 @@ const LANGUAGES: LangOption[] = [
     sample: "I need help. There is an injured person here.",
   },
 ];
+
+const SOURCE_GUIDES: Record<string, SourceGuide> = {
+  "ko-KR": {
+    empty: "텍스트를 입력하거나 마이크 버튼을 눌러 말해보세요.",
+    listening: "음성을 듣고 있습니다...",
+    placeholder: "번역할 문장을 입력하세요.",
+  },
+  "ja-JP": {
+    empty: "テキストを入力するか、マイクボタンを押して話してください。",
+    listening: "音声を聞き取っています...",
+    placeholder: "翻訳する文章を入力してください。",
+  },
+  "zh-CN": {
+    empty: "请输入文本，或点击麦克风按钮说话。",
+    listening: "正在听取语音...",
+    placeholder: "请输入要翻译的句子。",
+  },
+  "es-ES": {
+    empty: "Escribe un texto o pulsa el botón del micrófono para hablar.",
+    listening: "Escuchando...",
+    placeholder: "Escribe una frase para traducir.",
+  },
+  "fr-FR": {
+    empty: "Saisissez un texte ou appuyez sur le micro pour parler.",
+    listening: "Écoute en cours...",
+    placeholder: "Saisissez une phrase à traduire.",
+  },
+  "en-US": {
+    empty: "Type text or tap the microphone button to speak.",
+    listening: "Listening...",
+    placeholder: "Enter a sentence to translate.",
+  },
+};
+
+const TARGET_EMPTY_GUIDE = "Translation result will appear here.";
 
 const ENGLISH = {
   label: "English",
@@ -285,17 +326,20 @@ function getTranslatedTextFromResponse(data: TranslationApiResponse) {
 }
 
 async function translateToEnglish(text: string, sourceCode: string) {
-  if (!text.trim()) return "";
+  const trimmedText = text.trim();
+
+  if (!trimmedText) return "";
 
   if (sourceCode.startsWith("en")) {
-    return cleanTranslatedText(text);
+    return cleanTranslatedText(trimmedText);
   }
 
-  if (FALLBACK_TRANSLATIONS[text]) {
-    return FALLBACK_TRANSLATIONS[text];
+  if (FALLBACK_TRANSLATIONS[trimmedText]) {
+    return FALLBACK_TRANSLATIONS[trimmedText];
   }
 
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
+  const apiBaseUrl =
+    import.meta.env.VITE_API_BASE_URL || "https://peacelinkbe.up.railway.app";
   const sourceLang = shortLangCode(sourceCode);
 
   const response = await fetch(`${apiBaseUrl}/api/translation/interpret/text`, {
@@ -304,7 +348,7 @@ async function translateToEnglish(text: string, sourceCode: string) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      text,
+      text: trimmedText,
       sourceLang,
       targetLang: "en",
     }),
@@ -317,7 +361,7 @@ async function translateToEnglish(text: string, sourceCode: string) {
   const data = (await response.json()) as TranslationApiResponse;
   const translated = getTranslatedTextFromResponse(data);
 
-  return cleanTranslatedText(translated || text);
+  return cleanTranslatedText(translated || trimmedText);
 }
 
 function detectMedicalTerms(text: string) {
@@ -381,9 +425,7 @@ function HighlightedText({
 
 export default function CommPage() {
   const [sourceLang, setSourceLang] = useState<LangOption>(LANGUAGES[0]);
-  const SOURCE_EMPTY_GUIDE =
-    "텍스트를 입력하거나 마이크 버튼을 눌러 말해보세요.";
-  const TARGET_EMPTY_GUIDE = "번역 결과가 여기에 표시됩니다.";
+  const sourceGuide = SOURCE_GUIDES[sourceLang.code] ?? SOURCE_GUIDES["ko-KR"];
 
   const [sourceText, setSourceText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
@@ -413,6 +455,7 @@ export default function CommPage() {
   }, [translatedText, isTranslating, hasUserInput]);
 
   const hasMedicalTerms = detectedMedicalTerms.length > 0;
+
   useEffect(() => {
     if (!isEditingSource) return;
 
@@ -426,19 +469,24 @@ export default function CommPage() {
     let cancelled = false;
 
     const timer = window.setTimeout(async () => {
+      const trimmedText = sourceText.trim();
+
+      if (!trimmedText) {
+        setTranslatedText("");
+        setIsTranslating(false);
+        return;
+      }
+
       try {
         setIsTranslating(true);
-        const result = await translateToEnglish(sourceText, sourceLang.code);
+        const result = await translateToEnglish(trimmedText, sourceLang.code);
 
         if (!cancelled) {
           setTranslatedText(result);
         }
       } catch {
         if (!cancelled) {
-          setTranslatedText(
-            FALLBACK_TRANSLATIONS[sourceText] ||
-              "Translation is currently unavailable.",
-          );
+          setTranslatedText("Translation is currently unavailable.");
         }
       } finally {
         if (!cancelled) {
@@ -464,6 +512,7 @@ export default function CommPage() {
     const selected = LANGUAGES.find((lang) => lang.code === code);
 
     if (!selected) return;
+
     setHasUserInput(false);
     setSourceLang(selected);
     setSourceText("");
@@ -532,6 +581,7 @@ export default function CommPage() {
     if (preferredVoice) {
       utterance.voice = preferredVoice;
     }
+
     setSpeakingBlock(block);
     setHighlightRange({ start: 0, end: 1 });
 
@@ -586,6 +636,8 @@ export default function CommPage() {
     recognition.onstart = () => {
       setIsListening(true);
       setSourceText("");
+      setTranslatedText("");
+      setHasUserInput(false);
     };
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -596,6 +648,7 @@ export default function CommPage() {
       }
 
       setSourceText(transcript.trim());
+      setHasUserInput(true);
     };
 
     recognition.onerror = () => {
@@ -612,6 +665,8 @@ export default function CommPage() {
   };
 
   const copyTranslatedText = async () => {
+    if (!translatedText.trim()) return;
+
     try {
       await navigator.clipboard.writeText(translatedText);
       setCopied(true);
@@ -631,7 +686,7 @@ export default function CommPage() {
           ref={sourceTextareaRef}
           className="sourceText sourceTextarea"
           value={sourceText}
-          placeholder="번역할 문장을 입력하세요."
+          placeholder={sourceGuide.placeholder}
           rows={2}
           onChange={(event) => {
             setSourceText(event.target.value);
@@ -667,7 +722,7 @@ export default function CommPage() {
         <HighlightedText
           text={
             sourceText ||
-            (isListening ? "음성을 듣고 있습니다..." : SOURCE_EMPTY_GUIDE)
+            (isListening ? sourceGuide.listening : sourceGuide.empty)
           }
           className={sourceText ? "sourceText" : "sourceText sourceGuideText"}
           isActive={speakingBlock === "source"}
@@ -717,7 +772,7 @@ export default function CommPage() {
 
       {renderEditableSourceText()}
 
-      {isListening && <p className="statusText">음성을 듣고 있습니다...</p>}
+      {isListening && <p className="statusText">{sourceGuide.listening}</p>}
 
       <div className="iconRowRight">
         <button
@@ -726,6 +781,7 @@ export default function CommPage() {
           }`}
           aria-label="원문 음성 재생"
           onClick={() => speakText(sourceText, sourceLang.code, "source")}
+          disabled={!sourceText.trim()}
         >
           <SpeakerIcon />
         </button>
@@ -779,7 +835,7 @@ export default function CommPage() {
           }`}
           aria-label="영어 음성 재생"
           onClick={() => speakText(translatedText, ENGLISH.code, "target")}
-          disabled={isTranslating}
+          disabled={isTranslating || !translatedText.trim()}
         >
           <SpeakerIcon />
         </button>
@@ -788,7 +844,7 @@ export default function CommPage() {
           className={`iconBtn ${copied ? "targetIconActive" : ""}`}
           aria-label="복사"
           onClick={copyTranslatedText}
-          disabled={isTranslating}
+          disabled={isTranslating || !translatedText.trim()}
         >
           <CopyIcon />
         </button>
@@ -826,28 +882,26 @@ export default function CommPage() {
           {isSourceFirst ? renderTargetSection() : renderSourceSection()}
         </section>
 
-        {hasMedicalTerms && (
-          <section className="glossaryCard popCard">
-            <h3 className="glossaryTitle">전문 용어 설명</h3>
+        <section className="glossaryCard popCard">
+          <h3 className="glossaryTitle">전문 용어 설명</h3>
 
-            <div className="glossaryDivider" />
+          <div className="glossaryDivider" />
 
-            {hasMedicalTerms ? (
-              <>
-                {detectedMedicalTerms.map((item) => (
-                  <div className="glossaryItem" key={item.term}>
-                    <div className="glossaryTerm">{item.term}</div>
-                    <div className="glossaryDesc">{item.desc}</div>
-                  </div>
-                ))}
+          {hasMedicalTerms ? (
+            <>
+              {detectedMedicalTerms.map((item) => (
+                <div className="glossaryItem" key={item.term}>
+                  <div className="glossaryTerm">{item.term}</div>
+                  <div className="glossaryDesc">{item.desc}</div>
+                </div>
+              ))}
 
-                <div className="glossarySource">출처: WHO 의료 용어 사전</div>
-              </>
-            ) : (
-              <p className="glossaryEmpty">전문 용어가 없습니다</p>
-            )}
-          </section>
-        )}
+              <div className="glossarySource">출처: WHO 의료 용어 사전</div>
+            </>
+          ) : (
+            <p className="glossaryEmpty">전문 용어가 없습니다</p>
+          )}
+        </section>
       </main>
 
       {copied && (
