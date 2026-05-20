@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "../styles/CommPage.css";
 import { BottomNav } from "../components/BottomNav";
+import logoSvg from "../images/Peacelink.svg";
 
 type SpeechRecognitionAlternative = {
   transcript: string;
@@ -251,6 +252,38 @@ function cleanTranslatedText(text: string) {
     .trim();
 }
 
+type TranslationApiResponse = {
+  translatedText?: string;
+  translated_text?: string;
+  translation?: string;
+  result?: string;
+  text?: string;
+  message?: string;
+  data?: {
+    translatedText?: string;
+    translated_text?: string;
+    translation?: string;
+    result?: string;
+    text?: string;
+  };
+};
+
+function getTranslatedTextFromResponse(data: TranslationApiResponse) {
+  return (
+    data.translatedText ||
+    data.translated_text ||
+    data.translation ||
+    data.result ||
+    data.text ||
+    data.data?.translatedText ||
+    data.data?.translated_text ||
+    data.data?.translation ||
+    data.data?.result ||
+    data.data?.text ||
+    ""
+  );
+}
+
 async function translateToEnglish(text: string, sourceCode: string) {
   if (!text.trim()) return "";
 
@@ -262,21 +295,29 @@ async function translateToEnglish(text: string, sourceCode: string) {
     return FALLBACK_TRANSLATIONS[text];
   }
 
-  const source = shortLangCode(sourceCode);
-  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(
-    text,
-  )}&langpair=${source}|en`;
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
+  const sourceLang = shortLangCode(sourceCode);
 
-  const response = await fetch(url);
+  const response = await fetch(`${apiBaseUrl}/api/translation/interpret/text`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      text,
+      sourceLang,
+      targetLang: "en",
+    }),
+  });
 
   if (!response.ok) {
-    throw new Error("Translation API request failed");
+    throw new Error(`Translation API request failed: ${response.status}`);
   }
 
-  const data = await response.json();
-  const result = data?.responseData?.translatedText || text;
+  const data = (await response.json()) as TranslationApiResponse;
+  const translated = getTranslatedTextFromResponse(data);
 
-  return cleanTranslatedText(result);
+  return cleanTranslatedText(translated || text);
 }
 
 function detectMedicalTerms(text: string) {
@@ -340,10 +381,12 @@ function HighlightedText({
 
 export default function CommPage() {
   const [sourceLang, setSourceLang] = useState<LangOption>(LANGUAGES[0]);
-  const [sourceText, setSourceText] = useState(LANGUAGES[0].sample);
-  const [translatedText, setTranslatedText] = useState(
-    "I need help. There is an injured person here.",
-  );
+  const SOURCE_EMPTY_GUIDE =
+    "텍스트를 입력하거나 마이크 버튼을 눌러 말해보세요.";
+  const TARGET_EMPTY_GUIDE = "번역 결과가 여기에 표시됩니다.";
+
+  const [sourceText, setSourceText] = useState("");
+  const [translatedText, setTranslatedText] = useState("");
 
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isSourceFirst, setIsSourceFirst] = useState(true);
@@ -352,6 +395,7 @@ export default function CommPage() {
   const [copied, setCopied] = useState(false);
 
   const [isEditingSource, setIsEditingSource] = useState(false);
+  const [hasUserInput, setHasUserInput] = useState(false);
 
   const [speakingBlock, setSpeakingBlock] = useState<SpeakingBlock>(null);
   const [highlightRange, setHighlightRange] = useState<{
@@ -363,12 +407,12 @@ export default function CommPage() {
   const sourceTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const detectedMedicalTerms = useMemo(() => {
-    if (isTranslating) return [];
+    if (!hasUserInput || isTranslating) return [];
+
     return detectMedicalTerms(translatedText);
-  }, [translatedText, isTranslating]);
+  }, [translatedText, isTranslating, hasUserInput]);
 
   const hasMedicalTerms = detectedMedicalTerms.length > 0;
-
   useEffect(() => {
     if (!isEditingSource) return;
 
@@ -420,13 +464,51 @@ export default function CommPage() {
     const selected = LANGUAGES.find((lang) => lang.code === code);
 
     if (!selected) return;
-
+    setHasUserInput(false);
     setSourceLang(selected);
-    setSourceText(selected.sample);
+    setSourceText("");
+    setTranslatedText("");
     setHighlightRange(null);
     setSpeakingBlock(null);
     setIsEditingSource(false);
     window.speechSynthesis?.cancel();
+  };
+
+  const getPreferredVoice = (langCode: string): SpeechSynthesisVoice | null => {
+    if (!("speechSynthesis" in window)) return null;
+
+    const availableVoices = window.speechSynthesis.getVoices();
+
+    if (!availableVoices.length) return null;
+
+    if (langCode.startsWith("en")) {
+      return (
+        availableVoices.find(
+          (voice) =>
+            voice.lang === "en-US" &&
+            /google|microsoft|samantha|alex|english/i.test(voice.name),
+        ) ||
+        availableVoices.find((voice) => voice.lang === "en-US") ||
+        availableVoices.find((voice) => voice.lang.startsWith("en")) ||
+        null
+      );
+    }
+
+    if (langCode.startsWith("ko")) {
+      return (
+        availableVoices.find((voice) => voice.lang === "ko-KR") ||
+        availableVoices.find((voice) => voice.lang.startsWith("ko")) ||
+        null
+      );
+    }
+
+    return (
+      availableVoices.find((voice) => voice.lang === langCode) ||
+      availableVoices.find((voice) =>
+        voice.lang.startsWith(langCode.split("-")[0]),
+      ) ||
+      null
+    );
   };
 
   const speakText = (text: string, langCode: string, block: SpeakingBlock) => {
@@ -441,10 +523,15 @@ export default function CommPage() {
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
+    const preferredVoice = getPreferredVoice(langCode);
+
     utterance.lang = langCode;
-    utterance.rate = 0.95;
+    utterance.rate = langCode.startsWith("en") ? 0.9 : 0.95;
     utterance.pitch = 1;
 
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
     setSpeakingBlock(block);
     setHighlightRange({ start: 0, end: 1 });
 
@@ -546,7 +633,10 @@ export default function CommPage() {
           value={sourceText}
           placeholder="번역할 문장을 입력하세요."
           rows={2}
-          onChange={(event) => setSourceText(event.target.value)}
+          onChange={(event) => {
+            setSourceText(event.target.value);
+            setHasUserInput(true);
+          }}
           onBlur={() => setIsEditingSource(false)}
           onKeyDown={(event) => {
             if (event.key === "Escape") {
@@ -577,9 +667,9 @@ export default function CommPage() {
         <HighlightedText
           text={
             sourceText ||
-            (isListening ? "말씀해주세요..." : "마이크 버튼을 눌러 말해보세요.")
+            (isListening ? "음성을 듣고 있습니다..." : SOURCE_EMPTY_GUIDE)
           }
-          className="sourceText"
+          className={sourceText ? "sourceText" : "sourceText sourceGuideText"}
           isActive={speakingBlock === "source"}
           range={highlightRange}
         />
@@ -664,8 +754,14 @@ export default function CommPage() {
       </div>
 
       <HighlightedText
-        text={isTranslating ? "Translating..." : translatedText}
-        className="translatedText"
+        text={
+          isTranslating
+            ? "Translating..."
+            : translatedText || TARGET_EMPTY_GUIDE
+        }
+        className={
+          translatedText ? "translatedText" : "translatedText targetGuideText"
+        }
         isActive={speakingBlock === "target"}
         range={highlightRange}
       />
@@ -703,10 +799,9 @@ export default function CommPage() {
   return (
     <div className="page">
       <header className="header">
-        <div>
-          <span className="logoRed">Peace</span>
-          <span className="logoBlueBold">link</span>
-        </div>
+        <a href="/" className="commLogo" aria-label="PeaceLink 홈으로 이동">
+          <img src={logoSvg} alt="PeaceLink" />
+        </a>
       </header>
 
       <main className="content">
@@ -737,14 +832,20 @@ export default function CommPage() {
 
             <div className="glossaryDivider" />
 
-            {detectedMedicalTerms.map((item) => (
-              <div className="glossaryItem" key={item.term}>
-                <div className="glossaryTerm">{item.term}</div>
-                <div className="glossaryDesc">{item.desc}</div>
-              </div>
-            ))}
+            {hasMedicalTerms ? (
+              <>
+                {detectedMedicalTerms.map((item) => (
+                  <div className="glossaryItem" key={item.term}>
+                    <div className="glossaryTerm">{item.term}</div>
+                    <div className="glossaryDesc">{item.desc}</div>
+                  </div>
+                ))}
 
-            <div className="glossarySource">출처: WHO 의료 용어 사전</div>
+                <div className="glossarySource">출처: WHO 의료 용어 사전</div>
+              </>
+            ) : (
+              <p className="glossaryEmpty">전문 용어가 없습니다</p>
+            )}
           </section>
         )}
       </main>
@@ -755,6 +856,7 @@ export default function CommPage() {
           <ToastCheckIcon />
         </div>
       )}
+
       <BottomNav />
     </div>
   );

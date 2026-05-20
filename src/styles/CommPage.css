@@ -430,3 +430,34 @@
     transform: translate(-50%, 0);
   }
 }
+
+.glossaryEmpty {
+  margin: 0;
+  padding: 4px 0 2px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #9ca3af;
+  line-height: 1.5;
+}
+
+.sourceText {
+  color: #111827;
+}
+
+.sourceGuideText {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.targetGuideText {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.sourceTextarea {
+  color: #111827;
+}
+
+.sourceTextarea::placeholder {
+  color: #9ca3af;
+}
