@@ -1,0 +1,463 @@
+.page {
+  min-height: 100vh;
+  background: #f7f7fa;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 76px;
+  box-sizing: border-box;
+}
+
+.customLangDropdown {
+  position: relative;
+  z-index: 50;
+  display: inline-block;
+}
+
+.customLangBtn {
+  border: none;
+  outline: none;
+  background: rgba(235, 80, 78, 0.13);
+  color: #eb504e;
+  border-radius: 13px;
+  padding: 4px 8px;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.customArrow {
+  font-size: 18px;
+  font-weight: 700;
+  color: #eb504e;
+  transform: translateY(-1px);
+}
+
+.customLangMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 150px;
+
+  /* 여기 조정 */
+  padding: 6px 6px 8px;
+  border-radius: 16px;
+
+  background: #ffffff;
+  border: 1px solid #eeeef4;
+  box-shadow: 0 12px 28px rgba(20, 20, 30, 0.14);
+
+  /* 아래 잘림 방지 */
+  overflow: visible;
+  z-index: 999;
+}
+
+.customLangItem {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  border-radius: 11px;
+  padding: 10px 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #333333;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.customLangItem:hover {
+  background: #f7f7fb;
+}
+
+.customLangItem.selected {
+  background: rgba(235, 80, 78, 0.12);
+  color: #eb504e;
+}
+
+.customRegion {
+  color: #a0a4b1;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  padding: 16px 20px 8px;
+  display: flex;
+  align-items: center;
+}
+
+.logoRed {
+  font-size: 22px;
+  font-weight: 700;
+  color: #e8384f;
+  font-family: Georgia, serif;
+  font-style: italic;
+}
+
+.logoBlueBold {
+  font-size: 22px;
+  font-weight: 700;
+  color: #3b6fe8;
+  font-family: Georgia, serif;
+  font-style: italic;
+}
+
+.content {
+  flex: 1;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+}
+
+.section {
+  padding: 14px 16px 10px;
+}
+
+.langRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.langBtn {
+  background: #f3f4f6;
+  border: none;
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #e8384f;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.langBtnActive {
+  background: #eef2ff;
+  color: #3b6fe8;
+}
+
+.caret {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.region {
+  font-size: 13px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.sourceText {
+  font-size: 15px;
+  color: #e8384f;
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+
+.placeholder {
+  font-size: 15px;
+  color: #c4c9d4;
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+
+.translatedText {
+  font-size: 15px;
+  color: #1f2937;
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+
+.iconRowRight {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+}
+
+.dividerWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: #f0f0f0;
+}
+
+.swapBtn {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6b7280;
+  margin: 0 8px;
+  flex-shrink: 0;
+}
+
+.medOptRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.medOptBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+  line-height: 1;
+  padding: 7px 11px;
+  border-radius: 9px;
+
+  border: none;
+  background: #eeeeef;
+  color: #8a8f99;
+
+  cursor: default;
+  pointer-events: none;
+
+  font-weight: 600;
+  user-select: none;
+}
+
+.medOptBtnActive {
+  border: none;
+  background: #eeeeef;
+  color: #8a8f99;
+}
+
+.glossaryCard {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+  padding: 16px 18px;
+}
+
+.glossaryTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 14px;
+}
+
+.glossaryItem {
+  margin-bottom: 12px;
+}
+
+.glossaryTerm {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+
+.glossaryDesc {
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.glossarySource {
+  font-size: 11px;
+  color: #9ca3af;
+  text-align: right;
+  margin-top: 8px;
+}
+
+.editableTextWrap {
+  cursor: text;
+}
+
+.editableTextWrap:focus {
+  outline: none;
+}
+
+.sourceTextarea {
+  width: 100%;
+  min-height: 50px;
+  resize: none;
+
+  border: none;
+  outline: none;
+  background: transparent;
+
+  padding: 0;
+  box-sizing: border-box;
+  font-family: inherit;
+
+  cursor: text;
+}
+
+.sourceTextarea::placeholder {
+  color: #f3a2a1;
+}
+
+.iconBtn {
+  transition:
+    color 0.15s ease,
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.iconBtn:active {
+  transform: scale(0.94);
+}
+
+.sourceIconActive {
+  color: #eb504e;
+}
+
+.targetIconActive {
+  color: #534eeb;
+}
+
+.recordingIcon {
+  animation: pulseMic 1s infinite;
+}
+
+@keyframes pulseMic {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.14);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+.copyToast {
+  position: fixed;
+  top: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  /* 핵심: 폰 화면보다 커지지 않게 제한 */
+  width: calc(100vw - 48px);
+  max-width: 320px;
+  min-height: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 16px;
+  box-sizing: border-box;
+
+  background: #ffffff;
+  color: #5b5cff;
+
+  border: 1.5px solid rgba(91, 91, 255, 0.55);
+  border-radius: 10px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  box-shadow: 0 6px 14px rgba(91, 91, 255, 0.14);
+  z-index: 9999;
+
+  animation: copyToastDrop 0.22s ease-out;
+}
+
+.copyToast svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: #6b67ff;
+}
+
+@keyframes copyToastDrop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.glossaryEmpty {
+  margin: 0;
+  padding: 4px 0 2px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #9ca3af;
+  line-height: 1.5;
+}
+
+.sourceText {
+  color: #111827;
+}
+
+.sourceGuideText {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.targetGuideText {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.sourceTextarea {
+  color: #111827;
+}
+
+.sourceTextarea::placeholder {
+  color: #9ca3af;
+}
