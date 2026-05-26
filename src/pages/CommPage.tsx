@@ -337,7 +337,7 @@ async function translateToEnglish(text: string, sourceCode: string) {
   const sourceLang = shortLangCode(sourceCode);
 
   const response = await fetch(
-    `${API_BASE_URL}/api/translation/interpret/text`,
+    `${API_BASE_URL}/api/translation/offline-special`,
     {
       method: "POST",
       headers: {
