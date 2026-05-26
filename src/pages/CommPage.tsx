@@ -54,7 +54,12 @@ type LangOption = {
   label: string;
   code: string;
   region: string;
-  sample: string;
+};
+
+type SourceGuide = {
+  empty: string;
+  listening: string;
+  placeholder: string;
 };
 
 type SpeakingBlock = "source" | "target" | null;
@@ -64,48 +69,55 @@ type ExpertTerm = {
   desc: string;
 };
 
-type SourceGuide = {
-  empty: string;
-  listening: string;
-  placeholder: string;
+type TranslationApiResponse = {
+  translatedText?: string;
+  translated_text?: string;
+  translation?: string;
+  result?: string;
+  text?: string;
+  message?: string;
+  data?: {
+    translatedText?: string;
+    translated_text?: string;
+    translation?: string;
+    result?: string;
+    text?: string;
+  };
 };
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "https://peacelinkbe.up.railway.app";
 
 const LANGUAGES: LangOption[] = [
   {
     label: "한국어",
     code: "ko-KR",
     region: "KR",
-    sample: "도움이 필요합니다. 여기 부상자가 있습니다.",
   },
   {
     label: "日本語",
     code: "ja-JP",
     region: "JP",
-    sample: "助けが必要です。ここにけが人がいます。",
   },
   {
     label: "中文",
     code: "zh-CN",
     region: "CN",
-    sample: "我需要帮助。这里有人受伤了。",
   },
   {
     label: "Español",
     code: "es-ES",
     region: "ES",
-    sample: "Necesito ayuda. Hay una persona herida aquí.",
   },
   {
     label: "Français",
     code: "fr-FR",
     region: "FR",
-    sample: "J'ai besoin d'aide. Il y a une personne blessée ici.",
   },
   {
     label: "English",
     code: "en-US",
     region: "US",
-    sample: "I need help. There is an injured person here.",
   },
 ];
 
@@ -142,13 +154,13 @@ const SOURCE_GUIDES: Record<string, SourceGuide> = {
   },
 };
 
-const TARGET_EMPTY_GUIDE = "Translation result will appear here.";
-
 const ENGLISH = {
   label: "English",
   code: "en-US",
   region: "US",
 };
+
+const TARGET_EMPTY_GUIDE = "Translation result will appear here.";
 
 const FALLBACK_TRANSLATIONS: Record<string, string> = {
   "도움이 필요합니다. 여기 부상자가 있습니다.":
@@ -293,22 +305,6 @@ function cleanTranslatedText(text: string) {
     .trim();
 }
 
-type TranslationApiResponse = {
-  translatedText?: string;
-  translated_text?: string;
-  translation?: string;
-  result?: string;
-  text?: string;
-  message?: string;
-  data?: {
-    translatedText?: string;
-    translated_text?: string;
-    translation?: string;
-    result?: string;
-    text?: string;
-  };
-};
-
 function getTranslatedTextFromResponse(data: TranslationApiResponse) {
   return (
     data.translatedText ||
@@ -338,30 +334,64 @@ async function translateToEnglish(text: string, sourceCode: string) {
     return FALLBACK_TRANSLATIONS[trimmedText];
   }
 
-  const apiBaseUrl =
-    import.meta.env.VITE_API_BASE_URL || "https://peacelinkbe.up.railway.app";
   const sourceLang = shortLangCode(sourceCode);
 
-  const response = await fetch(`${apiBaseUrl}/api/translation/interpret/text`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `${API_BASE_URL}/api/translation/interpret/text`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      /*
+      백엔드 request body 필드명이 정확히 확정되지 않은 상태를 대비해서
+      자주 쓰는 필드명을 같이 보냄.
+      백엔드 명세가 확정되면 text/sourceLang/targetLang만 남겨도 됨.
+    */
+      body: JSON.stringify({
+        text: trimmedText,
+        inputText: trimmedText,
+        sentence: trimmedText,
+        message: trimmedText,
+        sourceLang,
+        sourceLanguage: sourceLang,
+        from: sourceLang,
+        targetLang: "en",
+        targetLanguage: "en",
+        to: "en",
+      }),
     },
-    body: JSON.stringify({
-      text: trimmedText,
-      sourceLang,
-      targetLang: "en",
-    }),
-  });
+  );
+
+  const rawText = await response.text();
 
   if (!response.ok) {
+    console.error("번역 API 실패");
+    console.error("status:", response.status);
+    console.error("response:", rawText);
     throw new Error(`Translation API request failed: ${response.status}`);
   }
 
-  const data = (await response.json()) as TranslationApiResponse;
+  let data: TranslationApiResponse;
+
+  try {
+    data = JSON.parse(rawText) as TranslationApiResponse;
+  } catch {
+    console.error("번역 API 응답이 JSON이 아님:", rawText);
+    throw new Error("Translation API response is not JSON");
+  }
+
+  console.log("번역 API 응답:", data);
+
   const translated = getTranslatedTextFromResponse(data);
 
-  return cleanTranslatedText(translated || trimmedText);
+  if (!translated) {
+    console.error("번역 결과 필드를 찾지 못함:", data);
+    throw new Error("Translated text not found");
+  }
+
+  return cleanTranslatedText(translated);
 }
 
 function detectMedicalTerms(text: string) {
@@ -484,9 +514,11 @@ export default function CommPage() {
         if (!cancelled) {
           setTranslatedText(result);
         }
-      } catch {
+      } catch (error) {
+        console.error("번역 처리 실패:", error);
+
         if (!cancelled) {
-          setTranslatedText("Translation is currently unavailable.");
+          setTranslatedText("번역에 실패했습니다. 잠시 후 다시 시도해주세요.");
         }
       } finally {
         if (!cancelled) {
