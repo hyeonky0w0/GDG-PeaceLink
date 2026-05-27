@@ -343,27 +343,13 @@ async function translateToEnglish(text: string, sourceCode: string) {
       headers: {
         "Content-Type": "application/json",
       },
-
-      /*
-      백엔드 request body 필드명이 정확히 확정되지 않은 상태를 대비해서
-      자주 쓰는 필드명을 같이 보냄.
-      백엔드 명세가 확정되면 text/sourceLang/targetLang만 남겨도 됨.
-    */
       body: JSON.stringify({
         text: trimmedText,
-        inputText: trimmedText,
-        sentence: trimmedText,
-        message: trimmedText,
         sourceLang,
-        sourceLanguage: sourceLang,
-        from: sourceLang,
         targetLang: "en",
-        targetLanguage: "en",
-        to: "en",
       }),
     },
   );
-
   const rawText = await response.text();
 
   if (!response.ok) {
