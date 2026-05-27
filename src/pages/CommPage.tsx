@@ -308,21 +308,22 @@ function cleanTranslatedText(text: string) {
 }
 
 function getTranslatedTextFromResponse(data: TranslationApiResponse) {
-  return (
-    data.translated ||
-    data.translatedText ||
-    data.translated_text ||
-    data.translation ||
-    data.result ||
-    data.text ||
-    data.data?.translated ||
-    data.data?.translatedText ||
-    data.data?.translated_text ||
-    data.data?.translation ||
-    data.data?.result ||
-    data.data?.text ||
-    ""
-  );
+  const translated =
+    data.translated ??
+    data.translatedText ??
+    data.translated_text ??
+    data.translation ??
+    data.result ??
+    data.text ??
+    data.data?.translated ??
+    data.data?.translatedText ??
+    data.data?.translated_text ??
+    data.data?.translation ??
+    data.data?.result ??
+    data.data?.text ??
+    "";
+
+  return typeof translated === "string" ? translated : String(translated);
 }
 
 async function translateToEnglish(text: string, sourceCode: string) {
