@@ -136,7 +136,7 @@ const SOURCE_GUIDES: Record<string, SourceGuide> = {
   "es-ES": {
     empty: "Escribe un texto o pulsa el botón del micrófono para hablar.",
     listening: "Escuchando...",
-    placeholder: "Escribe una frase para traducir.",
+    placeholder: "Escribe una frase para translate.",
   },
   "fr-FR": {
     empty: "Saisissez un texte ou appuyez sur le micro pour parler.",
@@ -161,7 +161,7 @@ const TARGET_EMPTY_GUIDE = "Translation result will appear here.";
 const FALLBACK_TRANSLATIONS: Record<string, string> = {
   "도움이 필요합니다. 여기 부상자가 있습니다.":
     "I need help. There is an injured person here.",
-  "助けが必要です。ここにけが人がいます.":
+  "助けが必要です。ここにけ가人이가 있습니다.":
     "I need help. There is an injured person here.",
   "我需要帮助。这里有人受伤了。":
     "I need help. There is an injured person here.",
@@ -293,7 +293,7 @@ function shortLangCode(code: string) {
   return code.split("-")[0];
 }
 
-// 🛠️ 백엔드 모델이 덧붙이는 시스템 메시지([Medical Term Analysis] 등)를 완벽하게 잘라내는 정제 함수
+// 🛠️ 백엔드 모델 안내 메시지를 확실히 날려버리는 정제 로직 완비
 function cleanTranslatedText(text: string) {
   let cleaned = text;
 
@@ -369,13 +369,12 @@ async function translateToEnglish(text: string, sourceCode: string) {
     throw new Error("Translation API response is not JSON");
   }
 
-  console.log("번역 API 응답:", responseData);
-
   const translated = getTranslatedTextFromResponse(responseData);
 
   if (!translated) {
-    console.warn("필드 자동 매칭 실패, 대체 추출 시도");
-    return responseData.translated || JSON.stringify(responseData);
+    return cleanTranslatedText(
+      responseData.translated || JSON.stringify(responseData),
+    );
   }
 
   return cleanTranslatedText(translated);
@@ -482,6 +481,7 @@ export default function CommPage() {
     sourceTextareaRef.current?.setSelectionRange(length, length);
   }, [isEditingSource]);
 
+  // 🛠️ 음성 인식 입력 및 키보드 입력 모든 경로의 번역 결과에 클리닝 확실하게 처리
   useEffect(() => {
     let cancelled = false;
 
@@ -499,7 +499,8 @@ export default function CommPage() {
         const result = await translateToEnglish(trimmedText, sourceLang.code);
 
         if (!cancelled) {
-          setTranslatedText(result);
+          // 여기서 최종 반환값 한 번 더 필터링 보장
+          setTranslatedText(cleanTranslatedText(result));
         }
       } catch (error) {
         console.error("번역 처리 실패:", error);
