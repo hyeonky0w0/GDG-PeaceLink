@@ -71,7 +71,6 @@ type ExpertTerm = {
   desc: string;
 };
 
-// 🛠️ 타입 미사용 및 정의 충돌 에러 완벽 해결을 위한 인터페이스 구조화
 interface TranslationApiResponse {
   success?: boolean;
   original?: string;
@@ -130,7 +129,7 @@ const SOURCE_GUIDES: Record<string, SourceGuide> = {
     placeholder: "翻訳する文章を入力してください。",
   },
   "zh-CN": {
-    empty: "请输入文本，或点击麦크로폰 버튼을 눌러 말해보세요.",
+    empty: "请输入文本，或点击麦克风按钮说话。",
     listening: "正在听取语音...",
     placeholder: "请输入要翻译的句子。",
   },
@@ -162,7 +161,7 @@ const TARGET_EMPTY_GUIDE = "Translation result will appear here.";
 const FALLBACK_TRANSLATIONS: Record<string, string> = {
   "도움이 필요합니다. 여기 부상자가 있습니다.":
     "I need help. There is an injured person here.",
-  "助けが必要です。ここにけが人がいます。":
+  "助けが必要です。ここにけが人がいます.":
     "I need help. There is an injured person here.",
   "我需要帮助。这里有人受伤了。":
     "I need help. There is an injured person here.",
@@ -294,15 +293,24 @@ function shortLangCode(code: string) {
   return code.split("-")[0];
 }
 
+// 🛠️ 백엔드 모델이 덧붙이는 시스템 메시지([Medical Term Analysis] 등)를 완벽하게 잘라내는 정제 함수
 function cleanTranslatedText(text: string) {
-  return text
+  let cleaned = text;
+
+  if (cleaned.includes("[Medical Term Analysis]")) {
+    cleaned = cleaned.split("[Medical Term Analysis]")[0];
+  }
+  if (cleaned.includes("【Medical Term Analysis】")) {
+    cleaned = cleaned.split("【Medical Term Analysis】")[0];
+  }
+
+  return cleaned
     .replace(/https?:\/\/\S+/g, "")
     .replace(/localhost:\d+/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-// 🛠️ 임의의 any 대신 명확한 타입을 지정하여 'Unexpected any' 해결
 function getTranslatedTextFromResponse(data: TranslationApiResponse): string {
   if (data && data.translated) {
     return data.translated;
@@ -352,7 +360,6 @@ async function translateToEnglish(text: string, sourceCode: string) {
     throw new Error(`Translation API request failed: ${response.status}`);
   }
 
-  // 🛠️ 에러가 나던 'let data: any;'를 상단에 선언한 구체적 타입 객체로 교체하여 경고 제거
   let responseData: TranslationApiResponse;
 
   try {
