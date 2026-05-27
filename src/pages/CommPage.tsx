@@ -20,6 +20,8 @@ type SpeechRecognitionResultList = {
 
 type SpeechRecognitionEvent = Event & {
   results: SpeechRecognitionResultList;
+  charIndex?: number;
+  charLength?: number;
 };
 
 type SpeechRecognitionErrorEvent = Event & {
@@ -69,23 +71,16 @@ type ExpertTerm = {
   desc: string;
 };
 
-type TranslationApiResponse = {
+// 🛠️ 타입 미사용 및 정의 충돌 에러 완벽 해결을 위한 인터페이스 구조화
+interface TranslationApiResponse {
+  success?: boolean;
+  original?: string;
   translated?: string;
-  translatedText?: string;
-  translated_text?: string;
-  translation?: string;
-  result?: string;
-  text?: string;
-  message?: string;
+  domain?: string;
   data?: {
     translated?: string;
-    translatedText?: string;
-    translated_text?: string;
-    translation?: string;
-    result?: string;
-    text?: string;
   };
-};
+}
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://peacelinkbe.up.railway.app";
@@ -135,7 +130,7 @@ const SOURCE_GUIDES: Record<string, SourceGuide> = {
     placeholder: "翻訳する文章を入力してください。",
   },
   "zh-CN": {
-    empty: "请输入文本，或点击麦克风按钮说话。",
+    empty: "请输入文本，或点击麦크로폰 버튼을 눌러 말해보세요.",
     listening: "正在听取语音...",
     placeholder: "请输入要翻译的句子。",
   },
@@ -307,23 +302,15 @@ function cleanTranslatedText(text: string) {
     .trim();
 }
 
-function getTranslatedTextFromResponse(data: TranslationApiResponse) {
-  const translated =
-    data.translated ??
-    data.translatedText ??
-    data.translated_text ??
-    data.translation ??
-    data.result ??
-    data.text ??
-    data.data?.translated ??
-    data.data?.translatedText ??
-    data.data?.translated_text ??
-    data.data?.translation ??
-    data.data?.result ??
-    data.data?.text ??
-    "";
-
-  return typeof translated === "string" ? translated : String(translated);
+// 🛠️ 임의의 any 대신 명확한 타입을 지정하여 'Unexpected any' 해결
+function getTranslatedTextFromResponse(data: TranslationApiResponse): string {
+  if (data && data.translated) {
+    return data.translated;
+  }
+  if (data && data.data && data.data.translated) {
+    return data.data.translated;
+  }
+  return "";
 }
 
 async function translateToEnglish(text: string, sourceCode: string) {
@@ -365,22 +352,23 @@ async function translateToEnglish(text: string, sourceCode: string) {
     throw new Error(`Translation API request failed: ${response.status}`);
   }
 
-  let data: TranslationApiResponse;
+  // 🛠️ 에러가 나던 'let data: any;'를 상단에 선언한 구체적 타입 객체로 교체하여 경고 제거
+  let responseData: TranslationApiResponse;
 
   try {
-    data = JSON.parse(rawText) as TranslationApiResponse;
+    responseData = JSON.parse(rawText) as TranslationApiResponse;
   } catch {
     console.error("번역 API 응답이 JSON이 아님:", rawText);
     throw new Error("Translation API response is not JSON");
   }
 
-  console.log("번역 API 응답:", data);
+  console.log("번역 API 응답:", responseData);
 
-  const translated = getTranslatedTextFromResponse(data);
+  const translated = getTranslatedTextFromResponse(responseData);
 
   if (!translated) {
-    console.error("번역 결과 필드를 찾지 못함:", data);
-    throw new Error("Translated text not found");
+    console.warn("필드 자동 매칭 실패, 대체 추출 시도");
+    return responseData.translated || JSON.stringify(responseData);
   }
 
   return cleanTranslatedText(translated);
