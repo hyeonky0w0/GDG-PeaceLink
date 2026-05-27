@@ -347,6 +347,7 @@ async function translateToEnglish(text: string, sourceCode: string) {
         text: trimmedText,
         sourceLang,
         targetLang: "en",
+        domain: "medical",
       }),
     },
   );
