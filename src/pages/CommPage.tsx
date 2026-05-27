@@ -70,6 +70,7 @@ type ExpertTerm = {
 };
 
 type TranslationApiResponse = {
+  translated?: string;
   translatedText?: string;
   translated_text?: string;
   translation?: string;
@@ -77,6 +78,7 @@ type TranslationApiResponse = {
   text?: string;
   message?: string;
   data?: {
+    translated?: string;
     translatedText?: string;
     translated_text?: string;
     translation?: string;
@@ -307,11 +309,13 @@ function cleanTranslatedText(text: string) {
 
 function getTranslatedTextFromResponse(data: TranslationApiResponse) {
   return (
+    data.translated ||
     data.translatedText ||
     data.translated_text ||
     data.translation ||
     data.result ||
     data.text ||
+    data.data?.translated ||
     data.data?.translatedText ||
     data.data?.translated_text ||
     data.data?.translation ||
